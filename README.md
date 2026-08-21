@@ -61,6 +61,16 @@ Current prototype stores business data locally in the browser. This is intention
 - Project cost, budget variance, profit, margin, and health update the dashboard from transaction data.
 - Arabic RTL / English LTR shell, responsive drawer navigation, print styles, and Excel export.
 
+## Project accounting milestone
+
+- Every project receives an automatic cost center and WBS dimension.
+- Journal lines carry company, project, cost center, cost code, WBS, BOQ, source module, source document, reference, account code, and account name.
+- Material issues, material receipts, project expenses, customer certificates, and subcontractor certificates create balanced automatic journals from the company accounting mapping.
+- Posted journals are locked; reversing a posted journal creates a new linked reversal with an audit trail.
+- Company Accounting includes financial-control exceptions, general ledger, trial balance, company income statement, chart of accounts, configurable account mapping, and month-end closing checklist.
+- Project Accounting includes project ledger, project trial balance, operational cost ledger, project income statement, financial position, profitability snapshot, journal drill-down, and accounting-to-cost-ledger reconciliation.
+- Existing browser data is migrated in place; user-created records are preserved.
+
 ## Prototype limitations and future migration
 
 This is a discovery prototype, not a production accounting system. Roles, approvals, taxes, numbering, accounting mappings, and transaction workflows must be confirmed with the target contractor before final backend design. The future migration replaces repositories with API implementations and connects a production file provider, authentication, audit, and approved database schema.
