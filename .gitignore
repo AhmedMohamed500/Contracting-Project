@@ -10,3 +10,5 @@ test-results/
 *.tsbuildinfo
 *-preview.png
 .DS_Store
+
+.vercel
