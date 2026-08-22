@@ -2,6 +2,9 @@ export type Id = string;
 export type Status = "active" | "archived" | "draft" | "submitted" | "approved" | "posted" | "cancelled";
 export type JournalStatus = "draft" | "reviewed" | "posted" | "reversed" | "cancelled";
 export type AccountType = "asset" | "liability" | "equity" | "revenue" | "cost" | "expense";
+export type StatementType = "balance-sheet" | "income-statement";
+export type NormalBalance = "debit" | "credit";
+export type CashFlowCategory = "operating" | "investing" | "financing" | "non-cash";
 export type AccountingDocumentType = "supplier-invoice" | "expense-invoice" | "customer-certificate" | "subcontractor-certificate" | "cash-receipt" | "cash-payment" | "bank-receipt" | "bank-payment" | "bank-transfer" | "employee-advance" | "advance-settlement" | "credit-note" | "debit-note" | "inventory-adjustment" | "journal-voucher" | "opening-balance";
 export type DocumentWorkflowStatus = "draft" | "submitted" | "under-review" | "approved" | "posted" | "rejected" | "cancelled";
 export type SettlementStatus = "unpaid" | "partially-settled" | "settled" | "not-applicable";
@@ -22,7 +25,7 @@ export interface VariationOrder extends BaseRecord { number: string; companyId: 
 export interface WbsNode extends BaseRecord { companyId: Id; projectId: Id; code: string; name: string; parentId?: Id; order: number; status: "active" | "archived"; }
 export interface CostCode extends BaseRecord { companyId: Id; code: string; name: string; parentId?: Id; order: number; status: "active" | "archived"; }
 export interface Warehouse extends BaseRecord { companyId: Id; projectId?: Id; code: string; name: string; type: "company-main" | "project" | "site" | "temporary" | "equipment"; location: string; keeper: string; reservedStock: number; status: "active" | "archived"; }
-export interface ChartOfAccount extends BaseRecord { companyId: Id; code: string; name: string; nameEn: string; type: AccountType; parentCode?: string; isControl: boolean; active: boolean; }
+export interface ChartOfAccount extends BaseRecord { companyId: Id; code: string; name: string; nameEn: string; type: AccountType; statementType?: StatementType; statementSection?: string; normalBalance?: NormalBalance; cashFlowCategory?: CashFlowCategory; parentCode?: string; isControl: boolean; active: boolean; }
 export interface AccountingMapping extends BaseRecord { companyId: Id; customerControl: string; supplierControl: string; subcontractorControl: string; inventory: string; materialCost: string; laborCost: string; equipmentCost: string; subcontractorCost: string; siteExpense: string; projectRevenue: string; wip: string; retentionReceivable: string; retentionPayable: string; cash: string; bank: string; vatOutput: string; vatInput: string; }
 export interface JournalLine { accountCode: string; accountName: string; description: string; debit: number; credit: number; projectId?: Id; costCenterCode?: string; costCode?: string; wbsCode?: string; boqItemId?: Id; reference?: string; sourceModule?: string; sourceDocument?: string; }
 export interface AuditEvent { action: "create" | "review" | "post" | "reverse" | "cancel"; user: string; timestamp: string; note?: string; }

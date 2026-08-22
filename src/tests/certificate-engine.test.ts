@@ -23,6 +23,18 @@ describe("cumulative certificate engine", () => {
     expect(second.grossAmount).toBe(data.projects.find((item) => item.id === "prj-2")!.contractValue * .15);
   });
 
+  it("calculates the required 20% → 35% → 50% scenario independently per project", () => {
+    const data = clone(); data.certificates = [];
+    const contract = data.projects.find((item) => item.id === "prj-2")!.contractValue;
+    const first = buildCertificate({ ...baseInput, cumulativeProgress: 20 }, data); data.certificates.push(first);
+    const second = buildCertificate({ ...baseInput, period: "2026-09", cumulativeProgress: 35 }, data); data.certificates.push(second);
+    const third = buildCertificate({ ...baseInput, period: "2026-10", cumulativeProgress: 50 }, data);
+    expect([first.currentPeriodProgress, second.currentPeriodProgress, third.currentPeriodProgress]).toEqual([20, 15, 15]);
+    expect([first.grossAmount, second.grossAmount, third.grossAmount]).toEqual([contract * .2, contract * .15, contract * .15]);
+    const otherProject = buildCertificate({ ...baseInput, projectId: "prj-3", partyId: "cus-1", cumulativeProgress: 20 }, data);
+    expect(otherProject.previousProgress).toBe(0);
+  });
+
   it("rejects cumulative progress lower than the previous certificate", () => {
     const data = clone(); data.certificates = [];
     data.certificates.push(buildCertificate({ ...baseInput, cumulativeProgress: 50 }, data));

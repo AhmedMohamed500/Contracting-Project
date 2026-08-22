@@ -76,7 +76,23 @@ export const demoData: ErpData = {
     { id: "acc-510200", ...base, companyId: "co-atlas", code: "510200", name: "تكلفة عمالة المشاريع", nameEn: "Project Labor Cost", type: "cost", parentCode: "510000", isControl: false, active: true },
     { id: "acc-510300", ...base, companyId: "co-atlas", code: "510300", name: "تكلفة معدات المشاريع", nameEn: "Project Equipment Cost", type: "cost", parentCode: "510000", isControl: false, active: true },
     { id: "acc-510400", ...base, companyId: "co-atlas", code: "510400", name: "تكلفة مقاولي الباطن", nameEn: "Subcontractor Cost", type: "cost", parentCode: "510000", isControl: false, active: true },
-    { id: "acc-510600", ...base, companyId: "co-atlas", code: "510600", name: "مصروفات المواقع", nameEn: "Site Expenses", type: "cost", parentCode: "510000", isControl: false, active: true }
+    { id: "acc-510600", ...base, companyId: "co-atlas", code: "510600", name: "مصروفات المواقع", nameEn: "Site Expenses", type: "cost", parentCode: "510000", isControl: false, active: true },
+    { id: "acc-100000", ...base, companyId: "co-atlas", code: "100000", name: "الأصول", nameEn: "Assets", type: "asset", isControl: true, active: true },
+    { id: "acc-110000", ...base, companyId: "co-atlas", code: "110000", name: "الأصول المتداولة", nameEn: "Current Assets", type: "asset", parentCode: "100000", isControl: true, active: true },
+    { id: "acc-120300", ...base, companyId: "co-atlas", code: "120300", name: "عهد وسلف", nameEn: "Advances", type: "asset", parentCode: "110000", isControl: true, active: true },
+    { id: "acc-120400", ...base, companyId: "co-atlas", code: "120400", name: "مصروفات مقدمة", nameEn: "Prepayments", type: "asset", parentCode: "110000", isControl: false, active: true },
+    { id: "acc-150000", ...base, companyId: "co-atlas", code: "150000", name: "الأصول غير المتداولة", nameEn: "Non-current Assets", type: "asset", parentCode: "100000", isControl: true, active: true },
+    { id: "acc-150100", ...base, companyId: "co-atlas", code: "150100", name: "الأصول الثابتة", nameEn: "Fixed Assets", type: "asset", parentCode: "150000", isControl: false, active: true },
+    { id: "acc-159100", ...base, companyId: "co-atlas", code: "159100", name: "مجمع الإهلاك", nameEn: "Accumulated Depreciation", type: "asset", parentCode: "150000", isControl: false, active: true },
+    { id: "acc-200000", ...base, companyId: "co-atlas", code: "200000", name: "الخصوم", nameEn: "Liabilities", type: "liability", isControl: true, active: true },
+    { id: "acc-230100", ...base, companyId: "co-atlas", code: "230100", name: "مصروفات مستحقة", nameEn: "Accrued Expenses", type: "liability", parentCode: "200000", isControl: false, active: true },
+    { id: "acc-300000", ...base, companyId: "co-atlas", code: "300000", name: "حقوق الملكية", nameEn: "Equity", type: "equity", isControl: true, active: true },
+    { id: "acc-310100", ...base, companyId: "co-atlas", code: "310100", name: "رأس المال", nameEn: "Capital", type: "equity", parentCode: "300000", isControl: false, active: true },
+    { id: "acc-320100", ...base, companyId: "co-atlas", code: "320100", name: "أرباح محتجزة", nameEn: "Retained Earnings", type: "equity", parentCode: "300000", isControl: false, active: true },
+    { id: "acc-330100", ...base, companyId: "co-atlas", code: "330100", name: "مسحوبات وتوزيعات", nameEn: "Drawings and Distributions", type: "equity", parentCode: "300000", isControl: false, active: true },
+    { id: "acc-420100", ...base, companyId: "co-atlas", code: "420100", name: "إيرادات أخرى", nameEn: "Other Income", type: "revenue", isControl: false, active: true },
+    { id: "acc-610100", ...base, companyId: "co-atlas", code: "610100", name: "مصروفات عمومية وإدارية", nameEn: "General and Administrative Expenses", type: "expense", isControl: false, active: true },
+    { id: "acc-620100", ...base, companyId: "co-atlas", code: "620100", name: "مصروفات أخرى", nameEn: "Other Expenses", type: "expense", isControl: false, active: true }
   ],
   accountingMappings: [{ id: "map-atlas", ...base, companyId: "co-atlas", customerControl: "120100", supplierControl: "210100", subcontractorControl: "210200", inventory: "130100", materialCost: "510100", laborCost: "510200", equipmentCost: "510300", subcontractorCost: "510400", siteExpense: "510600", projectRevenue: "410100", wip: "140100", retentionReceivable: "120200", retentionPayable: "210300", cash: "110100", bank: "110200", vatOutput: "220100", vatInput: "220100" }],
   journalEntries: [
@@ -93,3 +109,10 @@ export const demoData: ErpData = {
   settlements: [],
   settings: { currency: "EGP", vatRate: 14, withholdingRate: 1, allowNegativeStock: false, supplierLiabilityRecognition: "on-supplier-invoice", revenueRecognitionMethod: "on-certificate", overheadAllocationMethod: "manual" }
 };
+
+demoData.chartOfAccounts = demoData.chartOfAccounts.map((account) => {
+  const statementType = ["revenue", "cost", "expense"].includes(account.type) ? "income-statement" as const : "balance-sheet" as const;
+  const statementSection = account.code === "110100" ? "cash" : account.code === "110200" ? "banks" : account.code === "159100" ? "contra-assets" : account.type === "asset" ? (account.code.startsWith("15") ? "non-current-assets" : "current-assets") : account.type === "liability" ? "current-liabilities" : account.type === "equity" ? "equity" : account.type === "revenue" ? (account.code.startsWith("42") ? "other-income" : "project-revenue") : account.type === "cost" ? "project-cost" : account.code.startsWith("62") ? "other-expense" : "operating-expense";
+  const cashFlowCategory = account.code.startsWith("15") ? "investing" as const : account.type === "equity" ? "financing" as const : "operating" as const;
+  return { ...account, statementType, statementSection, normalBalance: ["liability", "equity", "revenue"].includes(account.type) ? "credit" as const : "debit" as const, cashFlowCategory };
+});

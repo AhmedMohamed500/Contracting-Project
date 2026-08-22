@@ -31,6 +31,18 @@ function normalize(data: ErpData): ErpData {
   const customers = (data.customers ?? []).map((item) => ({ ...item, companyId: item.companyId || fallbackCompany }));
   const suppliers = (data.suppliers ?? []).map((item) => ({ ...item, companyId: item.companyId || fallbackCompany }));
   const subcontractors = (data.subcontractors ?? []).map((item) => ({ ...item, companyId: item.companyId || fallbackCompany }));
+  const accountTemplate = cloneDemo().chartOfAccounts;
+  const currentAccounts = data.chartOfAccounts ?? [];
+  const chartOfAccounts = data.companies.flatMap((company) => {
+    const companyAccounts = currentAccounts.filter((account) => account.companyId === company.id);
+    const enriched = companyAccounts.map((account) => {
+      const template = accountTemplate.find((item) => item.code === account.code);
+      return { ...template, ...account, statementType: account.statementType ?? template?.statementType, statementSection: account.statementSection ?? template?.statementSection, normalBalance: account.normalBalance ?? template?.normalBalance ?? (["liability", "equity", "revenue"].includes(account.type) ? "credit" as const : "debit" as const), cashFlowCategory: account.cashFlowCategory ?? template?.cashFlowCategory ?? "operating" as const };
+    });
+    const existingCodes = new Set(enriched.map((account) => account.code));
+    const missing = accountTemplate.filter((account) => !existingCodes.has(account.code)).map((account) => ({ ...account, id: `${company.id}-${account.code}`, companyId: company.id }));
+    return [...enriched, ...missing];
+  });
   const normalizedJournals = (data.journalEntries ?? []).map((entry) => {
     const legacy = entry as unknown as { lines: { account?: string; accountCode?: string; accountName?: string; description: string; debit: number; credit: number; }[] };
     const project = projects.find((item) => item.id === entry.projectId);
@@ -68,7 +80,7 @@ function normalize(data: ErpData): ErpData {
     wbsNodes: data.wbsNodes ?? [],
     costCodes: data.costCodes ?? [],
     warehouses: data.warehouses ?? [],
-    chartOfAccounts: data.chartOfAccounts?.length ? data.chartOfAccounts : cloneDemo().chartOfAccounts,
+    chartOfAccounts,
     accountingMappings: data.accountingMappings?.length ? data.accountingMappings : cloneDemo().accountingMappings,
     fiscalPeriods: data.fiscalPeriods?.length ? data.fiscalPeriods : cloneDemo().fiscalPeriods,
     journalEntries,

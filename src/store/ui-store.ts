@@ -1,7 +1,7 @@
 import { create } from "zustand";
 
 export type Language = "ar" | "en";
-export type ModuleKey = "dashboard" | "companies" | "projects" | "contracts" | "structures" | "warehouses" | "parties" | "boq" | "procurement" | "inventory" | "expenses" | "certificates" | "accounting" | "costing" | "documents" | "settings";
+export type ModuleKey = "dashboard" | "companies" | "projects" | "contracts" | "structures" | "warehouses" | "parties" | "boq" | "procurement" | "inventory" | "expenses" | "certificates" | "accounting" | "accounting-documents" | "accounting-journals" | "general-ledger" | "subsidiary-ledger" | "trial-balance" | "financial-statements" | "income-statement" | "balance-sheet" | "cash-flow-statement" | "equity-statement" | "adjusted-trial" | "post-closing-trial" | "receivables" | "payables" | "treasury" | "settlements" | "accounting-closing" | "chart-accounts" | "cost-centers" | "account-mapping" | "accounting-control" | "costing" | "documents" | "settings";
 
 interface UiState {
   language: Language;

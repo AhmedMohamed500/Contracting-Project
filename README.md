@@ -78,6 +78,16 @@ Current prototype stores business data locally in the browser. This is intention
 - Project Accounting includes project ledger, project trial balance, operational cost ledger, project income statement, financial position, profitability snapshot, journal drill-down, and accounting-to-cost-ledger reconciliation.
 - Existing browser data is migrated in place; user-created records are preserved.
 
+## Accounting UX and financial statements
+
+- Accounting & Finance is organized as sidebar workflows: daily operations, ledgers and subledgers, financial statements, period end, configuration, and control. The accounting landing page no longer exposes a growing horizontal tab bar.
+- The financial statements center provides Arabic/English income statement, balance sheet, cash flow, changes in equity, detailed trial balance, adjusted trial balance, and post-closing trial balance.
+- Statements use posted journal lines and chart-of-accounts classification only. Balance-sheet and cash-flow reconciliation warnings are calculated, not hardcoded.
+- Company statements can be filtered by project; project selection intentionally shows a project financial position instead of a misleading full project balance sheet.
+- Trial balance displays opening debit/credit, period movement, and closing debit/credit with expandable account hierarchy.
+- Certificate creation uses a six-step wizard with live previous/current/cumulative progress and value calculations, approved variation impact, deductions, review, and submission to the accounting-document workflow.
+- Automated coverage currently includes 29 business-rule and financial-reconciliation tests.
+
 ## Prototype limitations and future migration
 
 This is a discovery prototype, not a production accounting system. Roles, approvals, taxes, numbering, accounting mappings, and transaction workflows must be confirmed with the target contractor before final backend design. The future migration replaces repositories with API implementations and connects a production file provider, authentication, audit, and approved database schema.
