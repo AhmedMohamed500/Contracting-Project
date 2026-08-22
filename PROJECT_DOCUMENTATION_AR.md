@@ -11,7 +11,7 @@
 | نوع المنتج | Construction ERP Prototype |
 | الجمهور المستهدف | شركات المقاولات، المقاولون، المكاتب الهندسية، فرق إدارة المشروعات والمواقع |
 | المستودع | <https://github.com/AhmedMohamed500/Contracting-Project> |
-| النسخة الحية | تُحدّث بعد نشر Milestone الحالي على Vercel |
+| النسخة الحية | <https://binaa-construction-erp.vercel.app/> |
 | الفرع الرئيسي | `main` |
 | التخزين الحالي | Browser LocalStorage |
 | Backend حقيقي | غير مستخدم عمدًا في مرحلة الـPrototype |
@@ -1227,7 +1227,9 @@ Vercel Project
 Automatic Production Deployment
 ```
 
-رابط النشر السابق كان يحمل الاسم القديم؛ رابط SiteCost ERP المعتمد يُسجل بعد التحقق من نشر Milestone الحالي.
+رابط الإنتاج العام (اسم النطاق القديم محفوظ لتجنب كسر الروابط، بينما هوية المنتج داخله SiteCost ERP):
+
+<https://binaa-construction-erp.vercel.app/>
 
 لا يستخدم المشروع:
 
