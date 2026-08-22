@@ -17,6 +17,8 @@
 | التخزين | Browser LocalStorage من خلال Repository Layer |
 | Backend / Database | غير مستخدمين عمدًا |
 | آخر Milestone محلي | First-Run Ownership & Local Authentication — 23 أغسطس 2026 |
+| آخر Commit وظيفي | `4782bda` |
+| حالة النشر | ✅ منشور ومختبر على Production بمتصفح جديد |
 
 ## 2. رؤية المنتج
 
@@ -346,6 +348,8 @@ Fresh context
   → Mobile width 390px without horizontal overflow
   → Logout returns to Login
 ```
+
+نتيجة Production بعد Push: Login panel = 38% وConstruction visual = 62% على 1440px، رسالة الفشل عامة، Session Restore ناجح، والأعداد `[customers, suppliers, projects, journals] = [0,0,0,0]`. فحص Mobile على 390px بلا Horizontal Overflow.
 
 ### آخر Quality Gate
 

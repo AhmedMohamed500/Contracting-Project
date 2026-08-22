@@ -136,7 +136,7 @@ npm run build
 
 Production: <https://binaa-construction-erp.vercel.app/>
 
-النشر متصل بـGitHub ولا يحتاج Database أو Add-ons مدفوعة. يجب اختبار كل نشر جديد على Browser profile فارغ لأن البيانات محلية لكل متصفح.
+النشر متصل بـGitHub ولا يحتاج Database أو Add-ons مدفوعة. آخر نشر اختُبر على Browser profile فارغ في Desktop وMobile، وشمل Setup وLogin failure/success وSession restore وEmpty Dashboard. يجب تكرار هذا الاختبار مع كل نشر لأن البيانات محلية لكل متصفح.
 
 ## Current Prototype Limitations
 
