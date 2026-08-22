@@ -1,6 +1,10 @@
-# Binaa Construction ERP Prototype
+# SiteCost ERP
 
-Interactive, local-first ERP prototype for construction companies, contractors, engineering offices, and project-control teams. The current milestone connects company and project master data with BOQ, procurement, inventory, expenses, certificates, accounting, costing, documents, and the executive dashboard.
+التوثيق العربي الشامل للمشروع: [PROJECT_DOCUMENTATION_AR.md](./PROJECT_DOCUMENTATION_AR.md)
+
+Construction Financial & Project Control System — an interactive, local-first ERP prototype for construction companies, contractors, engineering offices, and project-control teams. The current milestone connects company and project master data with contracts, WBS, cost codes, warehouses, BOQ, procurement, inventory, expenses, cumulative certificates, accounting, costing, documents, and the executive dashboard.
+
+The accounting cycle is part of the core architecture: source documents are registered first, classified through company mappings, converted to reviewable draft journals, posted to the shared ledger, and traced into open items, aging and financial statements.
 
 ## Architecture
 
@@ -36,9 +40,9 @@ npm test
 npm run build
 ```
 
-## Demo data
+## First run and demo data
 
-The first visit loads Atlas Construction demo data with three projects, customers, suppliers, a subcontractor, BOQ items, purchase orders, inventory movements, expenses, progress certificates, a journal entry, and a contract document. Use **Settings → Reset Demo Data** to restore it.
+The first visit opens a four-step setup wizard for company identity and financial defaults. Use **Settings → Reset Demo Data** to load the Atlas Construction scenario with three projects, customers, suppliers, a subcontractor, BOQ items, purchase orders, inventory movements, expenses, cumulative progress certificates, journals, contracts, WBS, cost codes, and warehouse records.
 
 ## Local persistence and backup
 
@@ -60,6 +64,9 @@ Current prototype stores business data locally in the browser. This is intention
 - Balanced journal creation feeds the trial balance.
 - Project cost, budget variance, profit, margin, and health update the dashboard from transaction data.
 - Arabic RTL / English LTR shell, responsive drawer navigation, print styles, and Excel export.
+- A global company/project/period context isolates operational lists and accounting workspaces.
+- Cumulative customer and subcontractor certificates automatically carry forward previous progress and reject lower or over-100% cumulative values.
+- Contracts include approved variation orders and revised contract value; WBS and cost codes support parent-child hierarchy, ordering, and archiving.
 
 ## Project accounting milestone
 

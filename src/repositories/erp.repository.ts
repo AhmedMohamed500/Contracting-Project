@@ -10,4 +10,6 @@ export interface ErpRepository {
 
 export interface FileStorageProvider {
   saveMetadata(data: ErpData): void;
+  upload?(file: File, relatedDocument: string): Promise<{ storageKey: string }>;
+  remove?(storageKey: string): Promise<void>;
 }

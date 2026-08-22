@@ -43,6 +43,23 @@ export const demoData: ErpData = {
     { id: "cert-1", ...base, number: "CERT-CUS-2026-0008", projectId: "prj-1", partyId: "cus-1", type: "customer", grossAmount: 7200000, retentionRate: 5, taxRate: 14, paidAmount: 5900000, status: "posted" },
     { id: "cert-2", ...base, number: "CERT-SUB-2026-0011", projectId: "prj-1", partyId: "sub-1", type: "subcontractor", grossAmount: 1650000, retentionRate: 10, taxRate: 14, paidAmount: 900000, status: "approved" }
   ],
+  contracts: [{ id: "contract-1", ...base, number: "CNT-2025-001", companyId: "co-atlas", projectId: "prj-1", customerId: "cus-1", type: "unit-price", originalValue: 48500000, startDate: "2025-01-15", endDate: "2026-12-20", advanceRate: 10, retentionRate: 5, paymentTerms: "30 days from certified invoice", penaltyRate: 0.1, status: "active" }],
+  variationOrders: [{ id: "vo-1", ...base, number: "VO-2026-001", companyId: "co-atlas", projectId: "prj-1", contractId: "contract-1", description: "تعديل نطاق الأعمال الكهروميكانيكية", costImpact: 420000, revenueImpact: 650000, scheduleImpactDays: 14, status: "approved" }],
+  wbsNodes: [
+    { id: "wbs-1", ...base, companyId: "co-atlas", projectId: "prj-1", code: "01", name: "الأعمال المدنية", order: 1, status: "active" },
+    { id: "wbs-1-1", ...base, companyId: "co-atlas", projectId: "prj-1", code: "01.01", name: "الأساسات", parentId: "wbs-1", order: 1, status: "active" },
+    { id: "wbs-1-1-1", ...base, companyId: "co-atlas", projectId: "prj-1", code: "01.01.01", name: "الحفر", parentId: "wbs-1-1", order: 1, status: "active" },
+    { id: "wbs-2", ...base, companyId: "co-atlas", projectId: "prj-1", code: "02", name: "الأعمال المعمارية", order: 2, status: "active" }
+  ],
+  costCodes: [
+    { id: "cost-1", ...base, companyId: "co-atlas", code: "01", name: "أعمال مدنية", order: 1, status: "active" },
+    { id: "cost-1-1", ...base, companyId: "co-atlas", code: "01.01", name: "حفر", parentId: "cost-1", order: 1, status: "active" },
+    { id: "cost-1-2", ...base, companyId: "co-atlas", code: "01.02", name: "خرسانة", parentId: "cost-1", order: 2, status: "active" }
+  ],
+  warehouses: [
+    { id: "wh-1", ...base, companyId: "co-atlas", code: "WH-MAIN", name: "المخزن الرئيسي", type: "company-main", location: "القاهرة", keeper: "أحمد محمود", reservedStock: 0, status: "active" },
+    { id: "wh-2", ...base, companyId: "co-atlas", projectId: "prj-1", code: "WH-PRJ-026", name: "مخزن موقع الإسكندرية", type: "site", location: "سموحة", keeper: "محمود علي", reservedStock: 12, status: "active" }
+  ],
   chartOfAccounts: [
     { id: "acc-110100", ...base, companyId: "co-atlas", code: "110100", name: "النقدية بالصندوق", nameEn: "Cash on Hand", type: "asset", isControl: false, active: true },
     { id: "acc-110200", ...base, companyId: "co-atlas", code: "110200", name: "البنوك", nameEn: "Banks", type: "asset", isControl: true, active: true },
@@ -69,5 +86,10 @@ export const demoData: ErpData = {
   ],
   fiscalPeriods: [{ id: "period-2026-08", ...base, companyId: "co-atlas", fiscalYear: 2026, month: 8, name: "أغسطس 2026", status: "open", closingTasks: [{ id: "purchases", label: "ترحيل فواتير المشتريات", completed: true }, { id: "customers", label: "مراجعة مستخلصات العملاء", completed: true }, { id: "subcontractors", label: "ترحيل مستخلصات مقاولي الباطن", completed: false }, { id: "inventory", label: "اعتماد تسويات المخزون", completed: false }, { id: "banks", label: "مراجعة البنوك والنقدية", completed: true }, { id: "accruals", label: "إثبات الاستحقاقات", completed: false }, { id: "trial", label: "مراجعة ميزان المراجعة", completed: false }, { id: "statements", label: "مراجعة القوائم المالية", completed: false }] }],
   documents: [{ id: "doc-1", ...base, fileName: "Alexandria-Contract-v3.pdf", type: "application/pdf", size: 2850000, category: "Contract", projectId: "prj-1", relatedTransaction: "PRJ-026", description: "نسخة العقد المعتمدة", uploadDate: "2026-07-10" }],
-  settings: { currency: "EGP", vatRate: 14, withholdingRate: 1, allowNegativeStock: false }
+  accountingDocuments: [
+    { id: "adoc-exp-1", ...base, number: "EXP-2026-0102", sourceNumber: "EXP-2026-0102", type: "expense-invoice", companyId: "co-atlas", projectId: "prj-1", costCode: "SITE-OPS", costCenterCode: "CC-PRJ-026", wbsCode: "WBS-ABC", accountCode: "510600", taxableAmount: 184000, taxRate: 0, taxAmount: 0, withholdingAmount: 0, otherDeductions: 0, grossAmount: 184000, netAmount: 184000, settledAmount: 184000, currency: "EGP", documentDate: "2026-08-15", reference: "EXP-2026-0102", description: "تشغيل وتجهيزات الموقع", workflowStatus: "posted", accountingStatus: "posted", settlementStatus: "settled", journalId: "jv-1", attachments: [], createdBy: "Accountant" },
+    { id: "adoc-cert-1", ...base, number: "CERT-CUS-2026-0008", sourceNumber: "CERT-CUS-2026-0008", type: "customer-certificate", companyId: "co-atlas", projectId: "prj-1", partyId: "cus-1", certificateId: "cert-1", costCenterCode: "CC-PRJ-026", wbsCode: "WBS-ABC", taxableAmount: 7200000, taxRate: 14, taxAmount: 1008000, withholdingAmount: 0, otherDeductions: 360000, grossAmount: 8208000, netAmount: 7848000, settledAmount: 5900000, currency: "EGP", documentDate: "2026-08-12", dueDate: "2026-09-11", reference: "CERT-CUS-2026-0008", description: "مستخلص عميل رقم 8", workflowStatus: "posted", accountingStatus: "posted", settlementStatus: "partially-settled", journalId: "jv-3", attachments: [], createdBy: "Project Accountant" }
+  ],
+  settlements: [],
+  settings: { currency: "EGP", vatRate: 14, withholdingRate: 1, allowNegativeStock: false, supplierLiabilityRecognition: "on-supplier-invoice", revenueRecognitionMethod: "on-certificate", overheadAllocationMethod: "manual" }
 };

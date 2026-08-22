@@ -1,23 +1,24 @@
 import type { Metadata } from "next";
+import { branding, brandTitle } from "@/config/branding";
 import "./globals.css";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : "http://localhost:3000");
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
-  title: "Binaa ERP | Construction Control",
-  description: "نظام متكامل لإدارة شركات المقاولات والمشروعات والتكاليف",
+  title: brandTitle,
+  description: branding.taglineArabic,
   openGraph: {
-    title: "Binaa ERP | Construction Control",
-    description: "Construction projects, procurement, inventory, finance and profitability in one integrated control system.",
+    title: brandTitle,
+    description: branding.tagline,
     type: "website",
-    images: [{ url: "/og.png", width: 1732, height: 917, alt: "Binaa ERP Construction Control System" }],
+    images: [{ url: branding.logo, width: 1732, height: 917, alt: brandTitle }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Binaa ERP | Construction Control",
-    description: "Integrated local-first construction ERP prototype.",
-    images: ["/og.png"],
+    title: brandTitle,
+    description: branding.tagline,
+    images: [branding.logo],
   },
 };
 

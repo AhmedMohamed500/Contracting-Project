@@ -2,10 +2,16 @@ import { demoData } from "@/data/demo-data";
 import type { ErpRepository } from "./erp.repository";
 import type { ErpData } from "@/types/erp";
 
-const STORAGE_KEY = "binaa-erp-data-v1";
+const STORAGE_KEY = "sitecost-erp-data-v2";
+const LEGACY_STORAGE_KEY = "binaa-erp-data-v1";
 
 function cloneDemo(): ErpData {
   return JSON.parse(JSON.stringify(demoData)) as ErpData;
+}
+
+function emptyPrototype(): ErpData {
+  const data = cloneDemo();
+  return { ...data, companies: [], customers: [], suppliers: [], subcontractors: [], projects: [], boqItems: [], purchaseOrders: [], inventoryMovements: [], expenses: [], certificates: [], contracts: [], variationOrders: [], wbsNodes: [], costCodes: [], warehouses: [], chartOfAccounts: [], accountingMappings: [], journalEntries: [], fiscalPeriods: [], documents: [], accountingDocuments: [], settlements: [] };
 }
 
 function isErpData(value: unknown): value is ErpData {
@@ -22,6 +28,9 @@ function normalize(data: ErpData): ErpData {
     wbsCode: project.wbsCode || `WBS-${project.code}`,
   }));
   const fallbackCompany = data.companies[0]?.id ?? "co-atlas";
+  const customers = (data.customers ?? []).map((item) => ({ ...item, companyId: item.companyId || fallbackCompany }));
+  const suppliers = (data.suppliers ?? []).map((item) => ({ ...item, companyId: item.companyId || fallbackCompany }));
+  const subcontractors = (data.subcontractors ?? []).map((item) => ({ ...item, companyId: item.companyId || fallbackCompany }));
   const normalizedJournals = (data.journalEntries ?? []).map((entry) => {
     const legacy = entry as unknown as { lines: { account?: string; accountCode?: string; accountName?: string; description: string; debit: number; credit: number; }[] };
     const project = projects.find((item) => item.id === entry.projectId);
@@ -50,26 +59,45 @@ function normalize(data: ErpData): ErpData {
     : normalizedJournals;
   return {
     ...data,
+    customers,
+    suppliers,
+    subcontractors,
     projects,
+    contracts: data.contracts ?? [],
+    variationOrders: data.variationOrders ?? [],
+    wbsNodes: data.wbsNodes ?? [],
+    costCodes: data.costCodes ?? [],
+    warehouses: data.warehouses ?? [],
     chartOfAccounts: data.chartOfAccounts?.length ? data.chartOfAccounts : cloneDemo().chartOfAccounts,
     accountingMappings: data.accountingMappings?.length ? data.accountingMappings : cloneDemo().accountingMappings,
     fiscalPeriods: data.fiscalPeriods?.length ? data.fiscalPeriods : cloneDemo().fiscalPeriods,
     journalEntries,
+    accountingDocuments: data.accountingDocuments ?? cloneDemo().accountingDocuments,
+    settlements: data.settlements ?? [],
+    settings: {
+      ...cloneDemo().settings,
+      ...data.settings,
+    },
   };
 }
 
 export class LocalStorageErpRepository implements ErpRepository {
   load(): ErpData {
     if (typeof window === "undefined") return cloneDemo();
-    const saved = window.localStorage.getItem(STORAGE_KEY);
+    const current = window.localStorage.getItem(STORAGE_KEY);
+    const legacy = window.localStorage.getItem(LEGACY_STORAGE_KEY);
+    const saved = current ?? legacy;
     if (!saved) {
-      const initial = cloneDemo();
+      const initial = emptyPrototype();
       this.save(initial);
       return initial;
     }
     try {
       const parsed: unknown = JSON.parse(saved);
-      return isErpData(parsed) ? normalize(parsed) : cloneDemo();
+      if (!isErpData(parsed)) return cloneDemo();
+      const migrated = normalize(parsed);
+      if (!current && legacy) this.save(migrated);
+      return migrated;
     } catch {
       return cloneDemo();
     }

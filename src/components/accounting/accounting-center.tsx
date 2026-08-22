@@ -5,19 +5,20 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { AlertTriangle, BookOpen, CheckCircle2, ClipboardCheck, FileBarChart, Landmark, RotateCcw, Scale, ShieldAlert, WalletCards } from "lucide-react";
 import { DataTable } from "@/components/shared/data-table";
 import { Modal } from "@/components/shared/modal";
+import { AccountingOperations } from "@/components/accounting/accounting-operations";
 import { calculateTrialBalance, companyIncomeStatement, projectCostLedger, projectFinancialPosition, projectIncomeStatement, projectJournalEntries, projectLedger, projectReconciliation, projectTrialBalance, reverseJournal } from "@/services/business-calculations";
 import type { AccountingMapping, ChartOfAccount, ErpData, JournalEntry, Project } from "@/types/erp";
 import { formatMoney } from "@/utils/format";
 
 type Commit = (data: ErpData, message?: string) => void;
-type AccountingView = "control" | "ledger" | "trial" | "income" | "accounts" | "mapping" | "closing";
-type ProjectView = "snapshot" | "ledger" | "trial" | "cost" | "income" | "position" | "journals";
+type AccountingView = "core" | "control" | "ledger" | "trial" | "income" | "accounts" | "mapping" | "closing";
+type ProjectView = "workspace" | "snapshot" | "ledger" | "trial" | "cost" | "income" | "position" | "journals";
 
-export function AccountingCenter({ data, commit }: { data: ErpData; commit: Commit }) {
-  const [view, setView] = useState<AccountingView>("control");
+export function AccountingCenter({ data, commit, companyId: contextCompanyId }: { data: ErpData; commit: Commit; companyId?: string }) {
+  const [view, setView] = useState<AccountingView>("core");
   const [selectedJournal, setSelectedJournal] = useState<JournalEntry>();
   const [projectFilter, setProjectFilter] = useState("all");
-  const companyId = data.companies.find((company) => company.status === "active")?.id ?? data.companies[0]?.id;
+  const companyId = contextCompanyId ?? data.companies.find((company) => company.status === "active")?.id ?? data.companies[0]?.id;
   const entries = data.journalEntries.filter((entry) => (!companyId || entry.companyId === companyId) && (projectFilter === "all" || entry.projectId === projectFilter));
   const trial = calculateTrialBalance(entries);
   const income = companyId ? companyIncomeStatement(data, companyId) : { revenue: 0, directCosts: 0, grossProfit: 0, expenses: 0, operatingProfit: 0 };
@@ -29,9 +30,10 @@ export function AccountingCenter({ data, commit }: { data: ErpData; commit: Comm
   const completedTasks = currentPeriod?.closingTasks.filter((task) => task.completed).length ?? 0;
   return <>
     <div className="accounting-toolbar">
-      <div className="segment-tabs">{([{ key: "control", label: "الرقابة المالية", icon: ShieldAlert }, { key: "ledger", label: "الأستاذ العام", icon: BookOpen }, { key: "trial", label: "ميزان المراجعة", icon: Scale }, { key: "income", label: "قائمة الدخل", icon: FileBarChart }, { key: "accounts", label: "دليل الحسابات", icon: Landmark }, { key: "mapping", label: "ربط الحسابات", icon: WalletCards }, { key: "closing", label: "الإقفال الشهري", icon: ClipboardCheck }] as const).map((item) => <button key={item.key} className={view === item.key ? "active" : ""} onClick={() => setView(item.key)}><item.icon size={15}/>{item.label}</button>)}</div>
+      <div className="segment-tabs">{([{ key: "core", label: "Core Accounting", icon: WalletCards }, { key: "control", label: "الرقابة المالية", icon: ShieldAlert }, { key: "ledger", label: "الأستاذ العام", icon: BookOpen }, { key: "trial", label: "ميزان المراجعة", icon: Scale }, { key: "income", label: "قائمة الدخل", icon: FileBarChart }, { key: "accounts", label: "دليل الحسابات", icon: Landmark }, { key: "mapping", label: "ربط الحسابات", icon: WalletCards }, { key: "closing", label: "الإقفال الشهري", icon: ClipboardCheck }] as const).map((item) => <button key={item.key} className={view === item.key ? "active" : ""} onClick={() => setView(item.key)}><item.icon size={15}/>{item.label}</button>)}</div>
       <select className="select" value={projectFilter} onChange={(event) => setProjectFilter(event.target.value)}><option value="all">كل المشروعات — حسابات الشركة</option>{data.projects.map((project) => <option key={project.id} value={project.id}>{project.code} — {project.name}</option>)}</select>
     </div>
+    {view === "core" && companyId && <AccountingOperations data={data} companyId={companyId} projectId={projectFilter === "all" ? undefined : projectFilter} commit={commit} onJournal={setSelectedJournal}/>}
     {view === "control" && <><div className="metrics"><AccountingMetric label="الفترة الحالية" value={currentPeriod?.name ?? "—"} note={currentPeriod?.status ?? "—"} icon={ClipboardCheck}/><AccountingMetric label="إجمالي المدين" value={formatMoney(totalDebit, data.settings.currency)} note="قيود مرحلة" icon={Landmark}/><AccountingMetric label="إجمالي الدائن" value={formatMoney(totalCredit, data.settings.currency)} note={Math.abs(totalDebit-totalCredit)<.01?"الميزان متوازن":"فرق يحتاج مراجعة"} icon={Scale} good={Math.abs(totalDebit-totalCredit)<.01}/><AccountingMetric label="الإقفال الشهري" value={`${completedTasks} / ${currentPeriod?.closingTasks.length ?? 0}`} note="مهام مكتملة" icon={ClipboardCheck}/></div><div className="control-grid"><ControlPanel title="استثناءات الدورة المحاسبية" icon={ShieldAlert} items={[{ label: "قيود مسودة غير متوازنة", value: String(data.journalEntries.filter((entry) => entry.status === "draft" && !isBalanced(entry)).length), danger: true }, { label: "مستندات تشغيل غير مرحلة", value: String(unpostedSources.length), danger: unpostedSources.length > 0 }, { label: "فروق تسوية تكلفة المشاريع", value: String(reconciliationIssues.length), danger: reconciliationIssues.length > 0 }, { label: "مشروعات بدون Cost Center", value: String(data.projects.filter((project) => !project.costCenterCode).length), danger: true }]}/><ControlPanel title="تغطية الربط المحاسبي" icon={CheckCircle2} items={[{ label: "الشركات المربوطة", value: `${data.accountingMappings.length}/${data.companies.length}` }, { label: "القيود الآلية", value: String(data.journalEntries.filter((entry) => entry.automatic).length) }, { label: "القيود اليدوية", value: String(data.journalEntries.filter((entry) => !entry.automatic).length) }, { label: "الحسابات النشطة", value: String(data.chartOfAccounts.filter((account) => account.active).length) }]}/></div>{unpostedSources.length>0&&<div className="card" style={{marginTop:16}}><div className="card-head"><div><h3>مستندات لم تُرحّل</h3><p>عمليات تشغيلية تحتاج Accounting Impact</p></div><span className="badge draft">{unpostedSources.length}</span></div><div className="card-body exception-list">{unpostedSources.map((item)=><div key={item.reference}><div><strong>{item.reference}</strong><small>{item.module} · {item.description}</small></div><span className="badge draft">Pending</span></div>)}</div></div>}</>}
     {view === "ledger" && <GeneralLedger entries={entries} currency={data.settings.currency} projects={data.projects} onJournal={setSelectedJournal}/>} 
     {view === "trial" && <TrialBalance rows={trial} currency={data.settings.currency}/>} 
@@ -43,9 +45,9 @@ export function AccountingCenter({ data, commit }: { data: ErpData; commit: Comm
   </>;
 }
 
-export function ProjectAccountingCenter({ data, projects }: { data: ErpData; projects: Project[] }) {
+export function ProjectAccountingCenter({ data, projects, commit }: { data: ErpData; projects: Project[]; commit?: Commit }) {
   const [projectId, setProjectId] = useState(projects[0]?.id ?? data.projects[0]?.id ?? "");
-  const [view, setView] = useState<ProjectView>("snapshot");
+  const [view, setView] = useState<ProjectView>("workspace");
   const [selectedJournal, setSelectedJournal] = useState<JournalEntry>();
   const project = data.projects.find((item) => item.id === projectId) ?? projects[0] ?? data.projects[0];
   if (!project) return <div className="empty"><strong>لا توجد مشروعات</strong></div>;
@@ -57,7 +59,8 @@ export function ProjectAccountingCenter({ data, projects }: { data: ErpData; pro
   const forecastProfit = project.contractValue - forecastCost;
   return <>
     <div className="project-accounting-head"><div><span>Project Accounting Dimension</span><h3>{project.code} — {project.name}</h3><p>{project.costCenterCode} · {project.wbsCode}</p></div><select className="select" value={project.id} onChange={(event)=>setProjectId(event.target.value)}>{data.projects.map((item)=><option key={item.id} value={item.id}>{item.code} — {item.name}</option>)}</select></div>
-    <div className="segment-tabs project-tabs">{([{key:"snapshot",label:"الملخص"},{key:"ledger",label:"دفتر المشروع"},{key:"trial",label:"ميزان المشروع"},{key:"cost",label:"دفتر التكلفة"},{key:"income",label:"قائمة الدخل"},{key:"position",label:"المركز المالي"},{key:"journals",label:"القيود"}] as const).map((item)=><button key={item.key} className={view===item.key?"active":""} onClick={()=>setView(item.key)}>{item.label}</button>)}</div>
+    <div className="segment-tabs project-tabs">{([{key:"workspace",label:"مساحة محاسب المشروع"},{key:"snapshot",label:"الملخص"},{key:"ledger",label:"دفتر المشروع"},{key:"trial",label:"ميزان المشروع"},{key:"cost",label:"دفتر التكلفة"},{key:"income",label:"قائمة الدخل"},{key:"position",label:"المركز المالي"},{key:"journals",label:"القيود"}] as const).map((item)=><button key={item.key} className={view===item.key?"active":""} onClick={()=>setView(item.key)}>{item.label}</button>)}</div>
+    {view==="workspace"&&commit&&<AccountingOperations data={data} companyId={project.companyId} projectId={project.id} commit={commit} onJournal={setSelectedJournal}/>}
     {view==="snapshot"&&<><div className="metrics project-snapshot"><AccountingMetric label="إيراد العقد" value={formatMoney(project.contractValue,data.settings.currency)} note={`${project.progress}% إنجاز`} icon={FileBarChart}/><AccountingMetric label="الإيراد المعتمد" value={formatMoney(position.certifiedRevenue,data.settings.currency)} note="Customer Certificates" icon={WalletCards}/><AccountingMetric label="التكلفة المحاسبية" value={formatMoney(reconciliation.accountingCost,data.settings.currency)} note="Posted project journals" icon={Landmark}/><AccountingMetric label="التكلفة الملتزم بها" value={formatMoney(committedCost,data.settings.currency)} note="Open purchase orders" icon={ClipboardCheck}/><AccountingMetric label="الربح الإجمالي" value={formatMoney(income.grossProfit,data.settings.currency)} note={`${(income.revenue?income.grossProfit/income.revenue*100:0).toFixed(1)}%`} icon={FileBarChart} good={income.grossProfit>=0}/><AccountingMetric label="الربح المتوقع" value={formatMoney(forecastProfit,data.settings.currency)} note={`${(project.contractValue?forecastProfit/project.contractValue*100:0).toFixed(1)}%`} icon={FileBarChart} good={forecastProfit>=0}/><AccountingMetric label="ذمم العملاء" value={formatMoney(position.customerReceivable,data.settings.currency)} note="Receivable" icon={WalletCards}/><AccountingMetric label="الاحتجازات" value={formatMoney(position.customerRetention,data.settings.currency)} note="Retention" icon={WalletCards}/></div><ReconciliationCard reconciliation={reconciliation} currency={data.settings.currency}/></>}
     {view==="ledger"&&<ProjectLedgerView projectId={project.id} data={data} onJournal={(number)=>setSelectedJournal(data.journalEntries.find((entry)=>entry.number===number))}/>} 
     {view==="trial"&&<ProjectTrialView projectId={project.id} data={data}/>} 
