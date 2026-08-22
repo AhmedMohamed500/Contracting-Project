@@ -120,7 +120,18 @@ Desktop:
 38% Solid Login Panel | 62% Bright Construction Visual
 ```
 
-تحتوي البطاقة الواضحة على شعار الشركة واسمها وSiteCost ERP وUsername وPassword وإظهار/إخفاء وكلمة دخول ورسالة الخطأ فقط. المنطقة الأكبر Visual إنشائي فاتح به مبانٍ ورافعة وخطوط Blueprint ورسالة واحدة. على Mobile يصبح الـVisual خلفية كاملة وبطاقة بيضاء في المنتصف دون Horizontal Scroll.
+تحتوي البطاقة الواضحة على شعار الشركة واسمها وSiteCost ERP وUsername وPassword وإظهار/إخفاء وكلمة دخول ورسالة الخطأ فقط. المنطقة الأكبر Visual إنشائي فاتح به مبنى حقيقي تحت الإنشاء ورافعة وخطوط Blueprint. على Mobile يتحول المشهد إلى Banner علوي مختصر وتظهر البطاقة بعرض كامل دون Horizontal Scroll.
+
+### Milestone — Premium First-Run Setup UI
+
+- استُبدل الرسم البرمجي القديم بصورة WebP واقعية لمبنى تجاري تحت الإنشاء ورافعة برجية ومخططات هندسية، مولّدة خصيصًا للمشروع ومضغوطة إلى نحو 241KB.
+- يستخدم Setup وLogin الأصل البصري نفسه لضمان وحدة المنتج.
+- Desktop Setup: مساحة النموذج 43% ومساحة المشهد الإنشائي 57%.
+- أُعيد بناء الـStepper إلى دوائر منفصلة، Connector بين الدوائر فقط، وأسماء الخطوات أسفلها بحد أقصى سطرين.
+- Mobile يعرض `الخطوة X من 5` واسم الخطوة وProgress Bar بدل ضغط خمس خطوات أفقيًا.
+- أصبحت بطاقة Setup ذات Max Width وInternal Scroll وFooter ثابت داخلها حتى يظل زر الإجراء ظاهرًا على Laptop 1366×768.
+- حقل المدير Grid حقيقي 2×2 على Desktop وعمود واحد على Mobile، مع Help Text تحت كلمة المرور فقط.
+- اختبارات القياس الآلية أكدت عدم تداخل Step labels، وظهور الزر، وعدم وجود Horizontal Overflow، وصحة RTL/LTR.
 
 ## 8. ملكية البيانات وEmpty Dashboard
 
@@ -422,4 +433,4 @@ Fresh context
 
 ---
 
-آخر تحديث: **23 أغسطس 2026**.
+آخر تحديث: **23 أغسطس 2026 — Premium First-Run Setup UI**.

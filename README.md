@@ -22,6 +22,8 @@ No company
 
 يدخل المستخدم بيانات شركته بنفسه. Sample Data اختيارية فقط من أدوات الـPrototype داخل Settings وبعد رسالة تحذير صريحة.
 
+تعتمد صفحة Setup وLogin نظامًا بصريًا موحدًا بصورة إنشاءات واقعية مضيئة. على Desktop تشغل صورة Setup نحو 57% والنموذج 43%، بينما يستخدم Mobile Banner إنشائيًا مختصرًا وStepper مبسطًا دون تزاحم.
+
 ## Company Logo
 
 - PNG وJPG وWEBP فقط.
