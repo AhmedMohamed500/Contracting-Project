@@ -16,8 +16,8 @@
 | التقنية | Next.js 16.3.2، React، TypeScript، Tailwind، Zustand، Vitest، Playwright |
 | التخزين | Browser LocalStorage من خلال Repository Layer |
 | Backend / Database | غير مستخدمين عمدًا |
-| آخر Milestone محلي | First-Run Ownership & Local Authentication — 23 أغسطس 2026 |
-| آخر Commit وظيفي | `4782bda` |
+| آخر Milestone | Premium First-Run Setup UI — 23 أغسطس 2026 |
+| آخر Commit وظيفي | `98fcf79` |
 | حالة النشر | ✅ منشور ومختبر على Production بمتصفح جديد |
 
 ## 2. رؤية المنتج
@@ -132,6 +132,7 @@ Desktop:
 - أصبحت بطاقة Setup ذات Max Width وInternal Scroll وFooter ثابت داخلها حتى يظل زر الإجراء ظاهرًا على Laptop 1366×768.
 - حقل المدير Grid حقيقي 2×2 على Desktop وعمود واحد على Mobile، مع Help Text تحت كلمة المرور فقط.
 - اختبارات القياس الآلية أكدت عدم تداخل Step labels، وظهور الزر، وعدم وجود Horizontal Overflow، وصحة RTL/LTR.
+- أعيد الاختبار بعد النشر على Vercel بمتصفح جديد: الصورة `241,360 bytes` محمّلة، Desktop `43% / 57%`، Mobile visual `180px`، والنتائج كلها ناجحة.
 
 ## 8. ملكية البيانات وEmpty Dashboard
 
