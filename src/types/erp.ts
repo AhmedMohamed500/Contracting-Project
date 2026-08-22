@@ -10,7 +10,9 @@ export type DocumentWorkflowStatus = "draft" | "submitted" | "under-review" | "a
 export type SettlementStatus = "unpaid" | "partially-settled" | "settled" | "not-applicable";
 
 export interface BaseRecord { id: Id; createdAt: string; updatedAt: string; }
-export interface Company extends BaseRecord { code?: string; name: string; nameEn: string; commercialRegistration?: string; taxNumber: string; phone: string; email: string; address: string; currency?: string; fiscalYearStartMonth?: number; defaultTaxRate?: number; defaultRetentionRate?: number; logoMetadata?: string; status: "active" | "archived"; }
+export interface Company extends BaseRecord { code?: string; name: string; nameEn: string; commercialRegistration?: string; taxNumber: string; phone: string; email: string; address: string; country?: string; currency?: string; fiscalYearStartMonth?: number; defaultTaxRate?: number; defaultRetentionRate?: number; logoMetadata?: string; logoDataUrl?: string; status: "active" | "archived"; }
+export type UserRole = "owner" | "general-manager" | "finance-manager" | "accountant" | "project-manager" | "site-engineer" | "procurement" | "warehouse-keeper" | "auditor";
+export interface ErpUser extends BaseRecord { fullName: string; username: string; passwordHash: string; passwordSalt: string; passwordIterations: number; role: UserRole; companyIds: Id[]; projectIds: Id[]; status: "active" | "archived"; }
 export interface Party extends BaseRecord { companyId?: Id; name: string; code: string; phone: string; email: string; taxNumber: string; balance: number; status: "active" | "archived"; }
 export interface Project extends BaseRecord { code: string; name: string; customerId: Id; companyId: Id; costCenterCode: string; wbsCode: string; location: string; contractValue: number; budget: number; actualCost: number; progress: number; startDate: string; endDate: string; status: "active" | "archived"; }
 export interface BoqItem extends BaseRecord { projectId: Id; code: string; description: string; unit: string; quantity: number; unitRate: number; budgetRate: number; actualQuantity: number; }
@@ -98,5 +100,6 @@ export interface ErpData {
   documents: DocumentMetadata[];
   accountingDocuments: AccountingDocument[];
   settlements: SettlementDocument[];
+  users: ErpUser[];
   settings: { currency: string; vatRate: number; withholdingRate: number; allowNegativeStock: boolean; supplierLiabilityRecognition: "on-receipt" | "on-supplier-invoice"; revenueRecognitionMethod: "on-certificate" | "percentage-of-completion"; overheadAllocationMethod: "manual" | "revenue" | "direct-cost" | "contract-value"; };
 }

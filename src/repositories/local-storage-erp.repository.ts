@@ -1,17 +1,19 @@
-import { demoData } from "@/data/demo-data";
 import type { ErpRepository } from "./erp.repository";
 import type { ErpData } from "@/types/erp";
 
 const STORAGE_KEY = "sitecost-erp-data-v2";
 const LEGACY_STORAGE_KEY = "binaa-erp-data-v1";
 
-function cloneDemo(): ErpData {
-  return JSON.parse(JSON.stringify(demoData)) as ErpData;
-}
-
-function emptyPrototype(): ErpData {
-  const data = cloneDemo();
-  return { ...data, companies: [], customers: [], suppliers: [], subcontractors: [], projects: [], boqItems: [], purchaseOrders: [], inventoryMovements: [], expenses: [], certificates: [], contracts: [], variationOrders: [], wbsNodes: [], costCodes: [], warehouses: [], chartOfAccounts: [], accountingMappings: [], journalEntries: [], fiscalPeriods: [], documents: [], accountingDocuments: [], settlements: [] };
+export function createEmptyErpData(): ErpData {
+  return {
+    version: 1,
+    companies: [], customers: [], suppliers: [], subcontractors: [], projects: [],
+    boqItems: [], purchaseOrders: [], inventoryMovements: [], expenses: [], certificates: [],
+    contracts: [], variationOrders: [], wbsNodes: [], costCodes: [], warehouses: [],
+    chartOfAccounts: [], accountingMappings: [], journalEntries: [], fiscalPeriods: [],
+    documents: [], accountingDocuments: [], settlements: [], users: [],
+    settings: { currency: "EGP", vatRate: 14, withholdingRate: 1, allowNegativeStock: false, supplierLiabilityRecognition: "on-supplier-invoice", revenueRecognitionMethod: "on-certificate", overheadAllocationMethod: "manual" },
+  };
 }
 
 function isErpData(value: unknown): value is ErpData {
@@ -20,8 +22,9 @@ function isErpData(value: unknown): value is ErpData {
   return data.version === 1 && Array.isArray(data.companies) && Array.isArray(data.projects) && Array.isArray(data.journalEntries);
 }
 
-function normalize(data: ErpData): ErpData {
-  const accountNames = new Map(demoData.chartOfAccounts.map((account) => [account.code, account.name]));
+export function normalizeErpData(data: ErpData): ErpData {
+  const defaults = createEmptyErpData();
+  const accountNames = new Map((data.chartOfAccounts ?? []).map((account) => [account.code, account.name]));
   const projects = data.projects.map((project) => ({
     ...project,
     costCenterCode: project.costCenterCode || `CC-${project.code}`,
@@ -31,17 +34,10 @@ function normalize(data: ErpData): ErpData {
   const customers = (data.customers ?? []).map((item) => ({ ...item, companyId: item.companyId || fallbackCompany }));
   const suppliers = (data.suppliers ?? []).map((item) => ({ ...item, companyId: item.companyId || fallbackCompany }));
   const subcontractors = (data.subcontractors ?? []).map((item) => ({ ...item, companyId: item.companyId || fallbackCompany }));
-  const accountTemplate = cloneDemo().chartOfAccounts;
   const currentAccounts = data.chartOfAccounts ?? [];
   const chartOfAccounts = data.companies.flatMap((company) => {
     const companyAccounts = currentAccounts.filter((account) => account.companyId === company.id);
-    const enriched = companyAccounts.map((account) => {
-      const template = accountTemplate.find((item) => item.code === account.code);
-      return { ...template, ...account, statementType: account.statementType ?? template?.statementType, statementSection: account.statementSection ?? template?.statementSection, normalBalance: account.normalBalance ?? template?.normalBalance ?? (["liability", "equity", "revenue"].includes(account.type) ? "credit" as const : "debit" as const), cashFlowCategory: account.cashFlowCategory ?? template?.cashFlowCategory ?? "operating" as const };
-    });
-    const existingCodes = new Set(enriched.map((account) => account.code));
-    const missing = accountTemplate.filter((account) => !existingCodes.has(account.code)).map((account) => ({ ...account, id: `${company.id}-${account.code}`, companyId: company.id }));
-    return [...enriched, ...missing];
+    return companyAccounts.map((account) => ({ ...account, normalBalance: account.normalBalance ?? (["liability", "equity", "revenue"].includes(account.type) ? "credit" as const : "debit" as const), cashFlowCategory: account.cashFlowCategory ?? "operating" as const }));
   });
   const normalizedJournals = (data.journalEntries ?? []).map((entry) => {
     const legacy = entry as unknown as { lines: { account?: string; accountCode?: string; accountName?: string; description: string; debit: number; credit: number; }[] };
@@ -64,11 +60,6 @@ function normalize(data: ErpData): ErpData {
       }),
     };
   });
-  const demoJournals = cloneDemo().journalEntries;
-  const isAtlasSeed = data.companies.some((company) => company.id === "co-atlas") && data.projects.some((project) => project.id === "prj-1");
-  const journalEntries = isAtlasSeed
-    ? [...normalizedJournals.map((entry) => entry.id === "jv-1" ? demoJournals.find((demo) => demo.id === "jv-1") ?? entry : entry), ...demoJournals.filter((demo) => demo.id !== "jv-1" && !normalizedJournals.some((entry) => entry.id === demo.id))]
-    : normalizedJournals;
   return {
     ...data,
     customers,
@@ -81,13 +72,14 @@ function normalize(data: ErpData): ErpData {
     costCodes: data.costCodes ?? [],
     warehouses: data.warehouses ?? [],
     chartOfAccounts,
-    accountingMappings: data.accountingMappings?.length ? data.accountingMappings : cloneDemo().accountingMappings,
-    fiscalPeriods: data.fiscalPeriods?.length ? data.fiscalPeriods : cloneDemo().fiscalPeriods,
-    journalEntries,
-    accountingDocuments: data.accountingDocuments ?? cloneDemo().accountingDocuments,
+    accountingMappings: data.accountingMappings ?? [],
+    fiscalPeriods: data.fiscalPeriods ?? [],
+    journalEntries: normalizedJournals,
+    accountingDocuments: data.accountingDocuments ?? [],
     settlements: data.settlements ?? [],
+    users: data.users ?? [],
     settings: {
-      ...cloneDemo().settings,
+      ...defaults.settings,
       ...data.settings,
     },
   };
@@ -95,23 +87,23 @@ function normalize(data: ErpData): ErpData {
 
 export class LocalStorageErpRepository implements ErpRepository {
   load(): ErpData {
-    if (typeof window === "undefined") return cloneDemo();
+    if (typeof window === "undefined") return createEmptyErpData();
     const current = window.localStorage.getItem(STORAGE_KEY);
     const legacy = window.localStorage.getItem(LEGACY_STORAGE_KEY);
     const saved = current ?? legacy;
     if (!saved) {
-      const initial = emptyPrototype();
+      const initial = createEmptyErpData();
       this.save(initial);
       return initial;
     }
     try {
       const parsed: unknown = JSON.parse(saved);
-      if (!isErpData(parsed)) return cloneDemo();
-      const migrated = normalize(parsed);
+      if (!isErpData(parsed)) return createEmptyErpData();
+      const migrated = normalizeErpData(parsed);
       if (!current && legacy) this.save(migrated);
       return migrated;
     } catch {
-      return cloneDemo();
+      return createEmptyErpData();
     }
   }
 
@@ -128,7 +120,7 @@ export class LocalStorageErpRepository implements ErpRepository {
   restore(json: string): ErpData {
     const parsed: unknown = JSON.parse(json);
     if (!isErpData(parsed)) throw new Error("INVALID_BACKUP");
-    const normalized = normalize(parsed);
+    const normalized = normalizeErpData(parsed);
     this.save(normalized);
     return normalized;
   }

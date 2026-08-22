@@ -1,1751 +1,421 @@
 # توثيق مشروع SiteCost ERP
 
-> وثيقة المشروع الرئيسية — الرؤية، النطاق، المعمارية، الوحدات، قواعد العمل، المحاسبة، التشغيل، الاختبارات، النشر وخارطة الطريق.
+> الوثيقة الرئيسية الموحّدة — محدثة وفق الحالة الفعلية للكود والاختبارات، وليست قائمة رغبات أو Status Matrix شكلية.
 
-## 1. معلومات المشروع
+## 1. بطاقة المشروع
 
 | البند | القيمة |
 | --- | --- |
-| اسم المنتج | SiteCost ERP / سايت كوست ERP |
-| الوصف | Construction Financial & Project Control System |
-| نوع المنتج | Construction ERP Prototype |
-| الجمهور المستهدف | شركات المقاولات، المقاولون، المكاتب الهندسية، فرق إدارة المشروعات والمواقع |
+| المنتج | SiteCost ERP / سايت كوست ERP |
+| الوصف الإنجليزي | Construction Financial & Project Control System |
+| الوصف العربي | نظام إدارة وتكاليف ومراقبة مشاريع المقاولات |
+| النوع | Construction ERP Interactive Prototype |
 | المستودع | <https://github.com/AhmedMohamed500/Contracting-Project> |
-| النسخة الحية | <https://binaa-construction-erp.vercel.app/> |
-| الفرع الرئيسي | `main` |
-| التخزين الحالي | Browser LocalStorage |
-| Backend حقيقي | غير مستخدم عمدًا في مرحلة الـPrototype |
-| Database حقيقية | غير مستخدمة عمدًا في مرحلة الـPrototype |
-| الاستضافة | Vercel Free Plan |
-| اللغة | العربية RTL والإنجليزية LTR |
-| حالة المشروع | Prototype تفاعلي قيد التطوير المرحلي |
+| Production | <https://binaa-construction-erp.vercel.app/> |
+| الفرع | `main` |
+| التقنية | Next.js 16.3.2، React، TypeScript، Tailwind، Zustand، Vitest، Playwright |
+| التخزين | Browser LocalStorage من خلال Repository Layer |
+| Backend / Database | غير مستخدمين عمدًا |
+| آخر Milestone محلي | First-Run Ownership & Local Authentication — 23 أغسطس 2026 |
 
-## 2. الهدف من المشروع
+## 2. رؤية المنتج
 
-إنشاء نموذج ERP تفاعلي واقعي لشركة مقاولات، يمكن عرضه على شركة حقيقية لتحليل الدورة المستندية والتشغيلية والمحاسبية قبل اتخاذ قرارات نهائية تخص:
+SiteCost ERP نموذج لربط دورة المقاولات من المشروع والعقد والمقايسة والتكلفة والمشتريات والمخازن والموقع والمستخلصات والتحصيلات والمدفوعات حتى القيود والأستاذ والقوائم المالية والرقابة.
 
-- قاعدة البيانات.
-- الـBackend.
-- المصادقة والصلاحيات الإنتاجية.
-- تخزين الملفات.
-- دورة الاعتمادات.
-- الضرائب.
-- مراكز التكلفة.
-- شجرة الحسابات.
-- دورة المشتريات والمخازن.
-- المقايسات والمستخلصات.
-- الإقفال المالي والتقارير النهائية.
-
-الهدف ليس إنشاء Admin Dashboard شكلي، بل تطبيق تعمل داخله العمليات وتؤثر على المخزون والتكاليف والقيود والربحية والتقارير.
-
-## 3. المبدأ التشغيلي العام
+المبدأ الحاكم:
 
 ```text
-Tendering
-  ↓
-Contracts
-  ↓
-Projects
-  ↓
-BOQ / Rate Analysis / Budget
-  ↓
-Procurement
-  ↓
-Warehouses / Inventory
-  ↓
-Site Execution / Expenses
-  ↓
-Project Cost
-  ↓
-Progress Certificates
-  ↓
-Treasury / Banks
-  ↓
-Accounting
-  ↓
-Project & Company Profitability
-  ↓
-Management Dashboard
+THE USER SUPPLIES THE BUSINESS DATA.
+SITECOST ERP SUPPLIES THE CONTROL.
 ```
 
-## 4. المبدأ المحاسبي الأساسي
+المستخدم يدخل شركاته وأطرافه ومشروعاته وعقوده وحساباته ومخازنه ومواده ومعاملاته. النظام يحفظ ويراجع ويحسب ويربط ويولد الأثر المحاسبي والتقارير. لا يجوز للنظام اختراع Business Data في التثبيت الجديد.
 
-المحاسبة ليست وحدة منفصلة عن المشروعات. جميع عمليات التشغيل يجب أن تغذي الدورة المحاسبية:
-
-```text
-Company Accounting
-  ↓
-Projects
-  ↓
-Project Transactions
-  ↓
-Journal Entries
-  ↓
-General Ledger
-  ↓
-Trial Balance
-  ↓
-Financial Reports
-```
-
-يمكن استخراج البيانات على مستوى:
-
-- الشركة بالكامل.
-- مشروع واحد.
-- حساب.
-- مركز تكلفة.
-- Cost Code.
-- WBS.
-- BOQ Item.
-- مصدر العملية.
-- المستند المصدر.
-
-## 5. ما لا يستخدمه المشروع حاليًا
-
-المشروع لا يستخدم في مرحلة الـPrototype:
-
-- PostgreSQL أو MySQL أو SQL Server أو SQLite.
-- MongoDB أو Firebase أو Supabase أو Neon.
-- Prisma أو Drizzle Database.
-- Backend API حقيقي.
-- Production Authentication.
-- Cloud File Storage.
-- خدمات مدفوعة أو APIs تحتاج Billing.
-- Paid UI Kits أو Paid Charts أو Paid PDF APIs.
-
-هذا قرار مقصود حتى لا يتم تثبيت Business Rules أو Database Schema قبل تحليل الشركة المستهدفة.
-
-## 6. التقنية المستخدمة
-
-### التطبيق
-
-- Next.js.
-- React.
-- Strict TypeScript.
-- Tailwind CSS.
-- Radix UI primitives.
-- Lucide React.
-- React Hook Form.
-- Zod.
-- TanStack Table.
-- Zustand.
-- Apache ECharts.
-- ExcelJS.
-- date-fns.
-- Sonner Toasts.
-
-### الجودة والاختبارات
-
-- Vitest لاختبارات الحسابات وقواعد العمل.
-- Playwright ضمن الـStack لاختبارات End-to-End.
-- ESLint.
-- TypeScript compiler.
-- Next.js Production Build.
-
-## 7. معمارية التطبيق
+## 3. المعمارية الحالية
 
 ```text
-Presentation Layer
-  Next.js / React Components
-          ↓
-Application Actions
-  CRUD + Workflow Commands
-          ↓
-Business / Domain Services
-  Costing + Accounting + Inventory + Certificates
-          ↓
+Presentation — Next.js / React
+  ↓
+Application Actions — CRUD and workflow commands
+  ↓
+Business Services — costing, certificates, accounting, statements
+  ↓
 Repository Interfaces
-          ↓
-LocalStorage Repository
-  Temporary Prototype Persistence
-```
-
-### سبب هذا الفصل
-
-- منع استخدام LocalStorage مباشرة داخل المكونات.
-- إبقاء الحسابات خارج JSX.
-- إمكانية استبدال `LocalStorageErpRepository` لاحقًا بـ`ApiErpRepository`.
-- الحفاظ على الواجهة والحسابات عند إضافة Backend.
-- سهولة اختبار Business Logic دون تشغيل المتصفح.
-
-## 8. هيكل الملفات الحالي
-
-```text
-src/
-├── app/
-│   ├── globals.css
-│   ├── layout.tsx
-│   └── page.tsx
-├── components/
-│   ├── accounting/
-│   │   └── accounting-center.tsx
-│   ├── forms/
-│   │   └── entity-form.tsx
-│   ├── shared/
-│   │   ├── data-table.tsx
-│   │   └── modal.tsx
-│   ├── erp-application.tsx
-│   └── quick-entry-form.tsx
-├── data/
-│   └── demo-data.ts
-├── repositories/
-│   ├── erp.repository.ts
-│   └── local-storage-erp.repository.ts
-├── services/
-│   └── business-calculations.ts
-├── store/
-│   └── ui-store.ts
-├── tests/
-│   └── business-calculations.test.ts
-├── types/
-│   └── erp.ts
-└── utils/
-    └── format.ts
-```
-
-## 9. التخزين المحلي
-
-### LocalStorage Repository
-
-البيانات تحفظ من خلال:
-
-```text
-ErpRepository
   ↓
-LocalStorageErpRepository
+LocalStorage / SessionStorage repositories
 ```
 
-المفتاح الحالي:
+القواعد:
+
+- لا وصول مباشر إلى LocalStorage من Components.
+- الحسابات خارج JSX.
+- لا Database أو Backend API أو خدمة مدفوعة في مرحلة الـPrototype.
+- FileStorageProvider يمثل نقطة الاستبدال المستقبلية؛ الملفات الكبيرة غير محفوظة محليًا.
+- الاستبدال المستقبلي بـAPI Repository لا يستلزم إعادة كتابة المحركات الحسابية.
+
+## 4. الهوية المركزية
+
+ملف [src/config/branding.ts](./src/config/branding.ts) هو المصدر المركزي لـ:
+
+- `productName`.
+- `productNameArabic`.
+- `shortName`.
+- `tagline`.
+- `taglineArabic`.
+- `logo`.
+
+تستخدم الهوية في Metadata وOpen Graph وWeb Manifest وSetup وLogin والـSidebar والتقارير والتوثيق. الألوان فاتحة ومهنية: أبيض، Concrete Gray، Ice Blue، Engineering Blue، Sand، وAmber كلون Accent.
+
+## 5. تجربة أول تشغيل
+
+Fresh installations تبدأ فارغة كليًا:
 
 ```text
-binaa-erp-data-v1
+Open SiteCost ERP
+  → No company found
+  → Five-step setup
+  → Company details
+  → Optional logo upload
+  → Financial defaults
+  → First administrator
+  → Review
+  → Finish
+  → Login screen
+  → Empty ERP
 ```
 
-### خصائص التخزين
+قبل اكتمال Setup لا يظهر Sidebar أو Dashboard أو Projects أو Accounting. وبعد Setup لا يدخل المستخدم مباشرة؛ يجب أن يختبر Username وPassword على شاشة الدخول.
 
-- البيانات تبقى بعد Refresh.
-- أول زيارة تحمل Demo Data تلقائيًا.
-- البيانات القديمة يتم Normalization/Migration لها عند القراءة.
-- سجلات المستخدم لا يتم حذفها أثناء Migration.
-- يمكن تصدير كل البيانات JSON.
-- يمكن استعادة JSON بعد Validation.
-- يمكن إعادة تحميل البيانات التجريبية بعد Confirmation.
+### خطوات Setup المنفذة
 
-### الهجرة المستقبلية
+1. بيانات الشركة: الكود، الاسمان العربي والإنجليزي، السجل، الرقم الضريبي، الهاتف، البريد، العنوان والدولة.
+2. شعار اختياري: PNG/JPG/WEBP حتى 400 KB.
+3. الإعداد المالي: العملة وبداية السنة المالية وVAT وRetention defaults.
+4. المدير: الاسم الكامل وUsername وPassword وConfirmation.
+5. مراجعة ثم إنهاء.
 
-عند إضافة Backend:
+إذا وُجدت بيانات قديمة بلا Users، تظهر خطوة استكمال إعداد المدير ولا تُستبدل الشركة أو المعاملات القديمة.
+
+## 6. المصادقة المحلية
+
+- Password policy: ثمانية أحرف على الأقل، حرف واحد ورقم واحد.
+- Web Crypto PBKDF2 + SHA-256.
+- Salt عشوائي مستقل لكل User.
+- 120,000 iteration.
+- يحفظ Hash وSalt فقط، ولا تحفظ كلمة المرور داخل Company أو LocalStorage.
+- Session محلية منفصلة في `sessionStorage`.
+- Session Restore يتحقق أن User ما زال Active.
+- Logout يمسح Session فقط ويعيد Login ولا يمس بيانات الشركة.
+- رسالة الخطأ عامة: اسم المستخدم أو كلمة المرور غير صحيحة.
+
+> المصادقة الحالية Prototype-only ومحلية. يجب استبدالها بمصادقة وصلاحيات Server-side قبل الإنتاج.
+
+## 7. شاشة Login
+
+Desktop:
 
 ```text
-UI
-  ↓
-Application Services
-  ↓
-ErpRepository Interface
-  ↓
-ApiErpRepository
+38% Solid Login Panel | 62% Bright Construction Visual
 ```
 
-لا يجب إعادة كتابة الحسابات أو مكونات العرض.
+تحتوي البطاقة الواضحة على شعار الشركة واسمها وSiteCost ERP وUsername وPassword وإظهار/إخفاء وكلمة دخول ورسالة الخطأ فقط. المنطقة الأكبر Visual إنشائي فاتح به مبانٍ ورافعة وخطوط Blueprint ورسالة واحدة. على Mobile يصبح الـVisual خلفية كاملة وبطاقة بيضاء في المنتصف دون Horizontal Scroll.
 
-## 10. نموذج البيانات الحالي
+## 8. ملكية البيانات وEmpty Dashboard
 
-### الكيانات الأساسية
+بعد أول Login:
 
-- `Company`
-- `Project`
-- `Party`
-  - Customer
-  - Supplier
-  - Subcontractor
-- `BoqItem`
-- `PurchaseOrder`
-- `InventoryMovement`
-- `Expense`
-- `Certificate`
-- `ChartOfAccount`
-- `AccountingMapping`
-- `JournalEntry`
-- `JournalLine`
-- `FiscalPeriod`
-- `DocumentMetadata`
+| الكيان | العدد |
+| --- | ---: |
+| Customers | 0 |
+| Suppliers | 0 |
+| Subcontractors | 0 |
+| Projects | 0 |
+| Contracts | 0 |
+| Warehouses | 0 |
+| Certificates | 0 |
+| Journals | 0 |
 
-### بيانات المشروع
+Revenue وCost وProfit وCash تبدأ من صفر. لا يوجد Alert باسم مشروع تجريبي. تظهر قائمة **ابدأ من هنا** لحساب دليل الحسابات والخزينة والأطراف والمشروع والعقد وWBS وCost Codes وBOQ والمخزن والأرصدة الافتتاحية.
 
-كل Project يحتوي حاليًا على:
+## 9. التخزين والهجرة
 
-- Code.
-- Name.
-- Company.
-- Customer.
-- Project Cost Center.
-- WBS Code.
-- Location.
-- Contract Value.
-- Budget.
-- Historical/Recorded Actual Cost.
-- Progress Percentage.
-- Start Date.
-- End Date.
-- Status.
+| البند | القيمة |
+| --- | --- |
+| المفتاح الحالي | `sitecost-erp-data-v2` |
+| المفتاح القديم | `binaa-erp-data-v1` |
+| السياسة | Read → Validate → Normalize → Save current key |
+| حذف المفتاح القديم | لا يتم تلقائيًا |
 
-عند إنشاء مشروع جديد يتم توليد:
+`createEmptyErpData()` لا يعتمد على Demo Data. فشل JSON أو Backup غير صالح لا يؤدي إلى تحميل Atlas. الـNormalization يحافظ على السجلات ويضيف الحقول البنيوية الناقصة فقط؛ ولا يحقن حسابات أو قيودًا أو مستندات Demo.
 
-```text
-Cost Center: CC-{Project Code}
-WBS: WBS-{Project Code}
-```
+## 10. نموذج البيانات الأساسي
 
-## 11. البيانات التجريبية
+- Company وErpUser.
+- Customer / Supplier / Subcontractor.
+- Project وContract وVariationOrder.
+- WbsNode وCostCode وBoqItem.
+- Warehouse وInventoryMovement.
+- PurchaseOrder وExpense وCertificate.
+- ChartOfAccount وAccountingMapping.
+- AccountingDocument وJournalEntry وSettlementDocument.
+- FiscalPeriod وDocumentMetadata.
 
-### الشركة
+كل User يحمل Company Access وProject Access، لكن شاشة الإدارة الكاملة للمستخدمين والصلاحيات ما زالت Roadmap.
 
-```text
-Atlas Construction / أطلس للمقاولات
-```
+## 11. الشركات والأطراف والمشروعات
+
+### الشركات
+
+Create/Edit/Archive/Persistence منفذة. إضافة شركة جديدة لا تنسخ Demo Chart أو Mapping تلقائيًا. العزل التشغيلي يتم حسب Company context.
+
+### العملاء والموردون ومقاولو الباطن
+
+Create/Edit/Archive/Search/Persistence كأساس تفاعلي. تبدأ القوائم فارغة ويضيف المستخدم سجلاته.
 
 ### المشروعات
 
-- `PRJ-026 — مركز الإسكندرية للأعمال`
-- `PRJ-031 — كمبوند القاهرة الجديدة السكني`
-- `PRJ-034 — منتجع الساحل الشمالي`
+Create/Edit/Archive والربط بالشركة والعميل والقيم والتقدم والتواريخ منفذة كأساس. يتم توليد Cost Center code وWBS root reference عند إنشاء المشروع. الـProject Creation Wizard ذي التسع خطوات وحقول Consultant/Managers/Accounting Setup لم يكتمل بعد.
 
-### الموردون
+## 12. العقود والتغييرات
 
-- دلتا لمواد البناء.
-- الإسكندرية لتوريدات الصلب.
-- القاهرة لتجارة الأسمنت.
+- Contract number، المشروع، العميل، النوع، القيمة الأصلية، Advance، Retention، Payment Terms، التواريخ والغرامة.
+- الأنواع: Lump Sum، Unit Price، Cost Plus، Time & Material، Other.
+- Variation Orders بحالات request/pricing/submitted/approved/rejected.
+- Revised Contract = Original + Approved Revenue Variations.
+- Change Events السابقة للـVariation الرسمية ما زالت غير منفذة كوحدة مستقلة.
 
-### المواد والأعمال
+## 13. WBS وCost Codes وBOQ والميزانية
 
-- حديد تسليح.
-- أسمنت.
-- خرسانة مسلحة.
-- سيراميك وتشطيبات.
-- مصروفات تشغيل موقع.
-- أعمال كهروميكانيكية لمقاول باطن.
+- WBS وCost Codes يدعمان Parent/Child، الترتيب والأرشفة والعرض الشجري كأساس.
+- BOQ يدعم الكود والوصف والوحدة والكمية وسعر البيع وسعر الميزانية والربط بالمشروع.
+- Rate Analysis التفصيلي حسب Material/Labor/Equipment/Subcontract/Transport/Indirect/Markup جزئي.
+- Budget Versions وOriginal/Revision/Approved Budget غير مكتملة كوحدة مستقلة.
 
-البيانات التجريبية ليست Lorem Ipsum؛ جميع الأرقام والعمليات مرتبطة بوحدات النظام.
+## 14. المشتريات والمخازن والعمليات
 
-## 12. الوحدات الحالية
+### المنفذ
 
-### 12.1 Executive Dashboard
+- Purchase Order أساسي وربطه بالمشروع والمورد.
+- PO receipt ينشئ Inventory Receipt وأثرًا محاسبيًا حسب السياسة.
+- Receipt/Issue/Transfer/Return أساسية.
+- منع الرصيد السالب عند الصرف.
+- Warehouse master بأنواعه وربطه الاختياري بالمشروع.
+- Project expenses وربطها بـCost Code ومستند محاسبي.
 
-تعرض بيانات محسوبة من العمليات:
+### الجزئي/المتبقي
 
-- قيمة العقود النشطة.
-- الإيراد المكتسب.
-- الربح المتوقع حتى تاريخه.
-- مستحقات العملاء.
-- Revenue vs Cost Chart.
-- صحة المشروعات.
-- تنبيهات الانحراف والتكلفة.
+- PR → RFQ → Quotations → Comparison → PO الكامل.
+- Supplier invoice matching وThree-way match.
+- Reservations وDetailed Transfers وWaste وStock Count.
+- Labor، Equipment، Daily Site Report، Productivity، Physical Progress.
+- Material reconciliation الكامل: purchased/received/issued/used/waste/returned/stock.
 
-### 12.2 Companies
+## 15. المستخلصات التراكمية
 
-- إنشاء شركة.
-- تعديل الشركة.
-- أرشفة وإعادة تنشيط.
-- بحث وفرز وصفحات.
-- عند إنشاء شركة يتم نسخ دليل حسابات وAccounting Mapping ابتدائي لها.
+الأنواع: Customer وSubcontractor. الطرق المتقدمة فعليًا حاليًا Overall Progress وBOQ Quantities، بينما BOQ Progress/Milestone/Manual Lines تحتاج محركات متخصصة إضافية.
 
-### 12.3 Projects
-
-- إنشاء وتعديل وأرشفة المشروع.
-- ربط الشركة والعميل.
-- Contract Value وBudget.
-- Progress.
-- Start/End Dates.
-- Cost Center وWBS تلقائيًا.
-- Project Health Score.
-
-### 12.4 Business Partners
-
-- العملاء.
-- الموردون.
-- مقاولو الباطن.
-- Create/Edit/Archive.
-- Code، Tax Number، Contact Data، Balance.
-
-### 12.5 BOQ
-
-- إضافة وحذف بنود المقايسة.
-- Project Dimension.
-- Code وDescription وUnit.
-- Quantity.
-- Selling Unit Rate.
-- Budget Unit Rate.
-- Total Value.
-- Unit Margin.
-
-### 12.6 Procurement
-
-- إنشاء Purchase Order.
-- ربط المشروع والمورد.
-- Approved/Posted status.
-- استلام أمر الشراء.
-- الاستلام ينشئ Inventory Receipt.
-- الاستلام ينشئ Automatic Journal.
-
-### 12.7 Inventory
-
-- Material Receipt.
-- Material Issue.
-- Transfer.
-- Return.
-- Warehouse Dimension.
-- Quantity وUnit Cost.
-- منع الرصيد السالب عند Material Issue.
-- Material Issue يغذي Project Cost Ledger.
-- Material Issue ينشئ Automatic Journal.
-
-### 12.8 Project Expenses
-
-- تسجيل المصروف.
-- Project Optional في النموذج المحاسبي لدعم Company-Level Expenses.
-- Cost Code.
-- Description، Amount، Date، Status.
-- المصروف المرتبط بمشروع ينشئ قيدًا تلقائيًا.
-
-### 12.9 Progress Certificates
-
-- Customer Certificate.
-- Subcontractor Certificate.
-- Gross Amount.
-- Retention Rate.
-- Tax Rate.
-- Net Amount.
-- Paid Amount.
-- Outstanding.
-- إنشاء القيد التلقائي حسب النوع.
-
-### 12.10 Documents Center
-
-يحفظ Metadata فقط:
-
-- File Name.
-- File Type.
-- Size.
-- Category.
-- Project.
-- Related Transaction.
-- Description.
-- Upload Date.
-
-لا يتم حفظ ملفات ضخمة داخل LocalStorage. يوجد `FileStorageProvider` Concept للمستقبل.
-
-### 12.11 Settings
-
-- Backup JSON.
-- Restore JSON.
-- Reset Demo Data.
-- Currency.
-- VAT Rate.
-- Withholding Rate.
-- Negative Stock Policy.
-
-## 13. دورة محاسبة المشروعات
-
-### 13.1 أبعاد سطر القيد
-
-كل `JournalLine` يدعم:
-
-- Account Code.
-- Account Name.
-- Debit.
-- Credit.
-- Company من Header القيد.
-- Project.
-- Cost Center.
-- Cost Code.
-- WBS.
-- BOQ Item.
-- Reference.
-- Source Module.
-- Source Document.
-- Description.
-
-### 13.2 قاعدة العرض الإلزامية
-
-الحساب يعرض دائمًا:
+القواعد:
 
 ```text
-510100 — تكلفة مواد المشاريع
+Current Progress = New Cumulative − Previous Cumulative
+Current Value = Current Progress × Revised Contract Value
 ```
 
-المشروع يعرض دائمًا:
+اختبار القبول الإلزامي ناجح:
+
+| المستخلص | السابق | التراكمي | الحالي |
+| --- | ---: | ---: | ---: |
+| #1 | 0% | 20% | 20% |
+| #2 | 20% | 35% | 15% |
+| #3 | 35% | 50% | 15% |
+
+يوجد منع للانخفاض وتجاوز 100% وتجاوز BOQ quantity وقفل ما بعد Final Certificate. الـWizard ست خطوات ويعرض السابق والحالي والتراكمي والمتبقي والقيم والخصومات، ثم ينشئ Accounting Document للمراجعة بدل الترحيل المباشر.
+
+## 16. الدورة المستندية والمحاسبية
+
+المسار الأساسي:
 
 ```text
-PRJ-026 — مركز الإسكندرية للأعمال
+Source Document
+  → Workflow review
+  → Accounting classification
+  → Draft multi-line journal
+  → Review
+  → Post
+  → General Ledger
+  → Trial Balance
+  → Financial Statements
 ```
 
-Cost Code يعرض بالشكل:
+المنفذ كأساس تفاعلي:
+
+- Accounting Document Register وحالات Workflow/Accounting/Settlement منفصلة.
+- Accounting Mapping لكل شركة.
+- قيد متعدد السطور.
+- Draft/Reviewed/Posted، مع منع الترحيل في فترة مغلقة.
+- قفل القيد المرحل وإنشاء Reversal مرتبط بدل الحذف.
+- Collections وSupplier/Subcontractor Payments وPartial Allocation وAuto Allocate Oldest.
+- Open Items وAging buckets.
+- Accountant Workspace وException Center.
+- General Ledger وTrial Balance وProject Ledger.
+
+## 17. القوائم المالية
+
+المصدر الوحيد:
 
 ```text
-01.02 — Concrete Works
+Posted Journal Lines + Chart of Accounts Classification
 ```
 
-## 14. دليل الحسابات التجريبي
-
-| الكود | الحساب | النوع |
-| --- | --- | --- |
-| 110100 | النقدية بالصندوق | Asset |
-| 110200 | البنوك | Asset |
-| 120100 | ذمم العملاء | Asset / Control |
-| 120200 | احتجازات لدى العملاء | Asset / Control |
-| 130100 | مخزون المواد | Asset / Control |
-| 140100 | أعمال تحت التنفيذ | Asset / Control |
-| 210100 | ذمم الموردين | Liability / Control |
-| 210200 | ذمم مقاولي الباطن | Liability / Control |
-| 210300 | احتجازات مقاولي الباطن | Liability / Control |
-| 220100 | ضريبة القيمة المضافة | Liability / Control |
-| 410100 | إيرادات عقود المشاريع | Revenue |
-| 510100 | تكلفة مواد المشاريع | Project Cost |
-| 510200 | تكلفة عمالة المشاريع | Project Cost |
-| 510300 | تكلفة معدات المشاريع | Project Cost |
-| 510400 | تكلفة مقاولي الباطن | Project Cost |
-| 510600 | مصروفات المواقع | Project Cost |
-
-هذه الشجرة Demo فقط وقابلة للتغيير بعد تحليل شركة المقاولات.
-
-## 15. Accounting Mapping
-
-كل Company لها Mapping مستقل، ويستخدمه محرك القيود الآلية. الحسابات غير Hardcoded داخل عملية التشغيل.
-
-الـMapping الحالي يدعم:
-
-- Customer Control.
-- Supplier Control.
-- Subcontractor Control.
-- Inventory.
-- Material Cost.
-- Labor Cost.
-- Equipment Cost.
-- Subcontractor Cost.
-- Site Expense.
-- Project Revenue.
-- WIP.
-- Retention Receivable.
-- Retention Payable.
-- Cash.
-- Banks.
-- VAT Input.
-- VAT Output.
-
-يمكن تعديل الربط من:
-
-```text
-Accounting → ربط الحسابات
-```
-
-## 16. القيود الآلية
-
-### 16.1 استلام مواد / Purchase Receipt
-
-```text
-Dr  Inventory
-Cr  Supplier Control
-```
-
-### 16.2 صرف مواد للمشروع
-
-```text
-Dr  Project Material Cost
-Cr  Inventory
-```
-
-الأبعاد:
-
-- Project.
-- Cost Center.
-- Cost Code.
-- WBS.
-- BOQ.
-- Material Issue Number.
-
-### 16.3 مصروف مشروع
-
-```text
-Dr  Project Site Expense
-Cr  Cash
-```
-
-### 16.4 مستخلص عميل
-
-```text
-Dr  Customer Receivable
-Dr  Retention Receivable
-Cr  Project Revenue
-Cr  VAT Output
-```
-
-### 16.5 مستخلص مقاول باطن
-
-```text
-Dr  Subcontractor Project Cost
-Dr  VAT Input
-Cr  Subcontractor Payable
-Cr  Retention Payable
-```
-
-## 17. Manual Journal
-
-المدخلات الحالية:
-
-- Date.
-- Description.
-- Debit Account: `Code — Name`.
-- Credit Account: `Code — Name`.
-- Amount.
-- Project optional.
-- Cost Code optional.
-- Reference optional.
-
-قواعد التحقق:
-
-- الحساب المدين مطلوب.
-- الحساب الدائن مطلوب.
-- القيمة يجب أن تكون صحيحة.
-- القيد يجب أن يكون متوازنًا.
-- الفترة المغلقة لا تقبل قيدًا عاديًا.
-
-## 18. دورة حياة القيد
-
-الحالات المدعومة في الـDomain:
-
-```text
-Draft
-Reviewed
-Posted
-Reversed
-Cancelled
-```
-
-قواعد أساسية:
-
-- Draft قابل للتعديل.
-- Posted لا يتم حذفه مباشرة.
-- Posted لا يتم تعديله عشوائيًا.
-- عكس القيد ينشئ قيدًا جديدًا.
-- القيد العكسي يبدل Debit/Credit.
-- القيد العكسي يحتفظ بمرجع القيد الأصلي.
-- كل قيد يحتفظ بـAudit Trail.
-
-## 19. Audit Trail
-
-القيد يحتفظ بـ:
-
-- Action.
-- User.
-- Timestamp.
-- Optional Note.
-
-الأحداث الحالية:
-
-- Create.
-- Review.
-- Post.
-- Reverse.
-- Cancel.
-
-## 20. Company Accounting
-
-### 20.1 Financial Control
-
-تعرض:
-
-- Current Period.
-- Total Debits.
-- Total Credits.
-- Trial Balance Status.
-- Month-End Completion.
-- Unbalanced Draft Journals.
-- Unposted Source Documents.
-- Project Cost Reconciliation Differences.
-- Projects without Cost Centers.
-- Companies without Mapping.
-- Automatic vs Manual Journals.
-
-### 20.2 Company General Ledger
-
-Columns:
-
-- Date.
-- Journal.
-- Account Code — Name.
-- Description.
-- Debit.
-- Credit.
-- Running Balance.
-- Project Code — Name.
-- Reference.
-
-### 20.3 Company Trial Balance
-
-- Account Code.
-- Account Name.
-- Total Debit.
-- Total Credit.
-- Balance.
-- Project filter optional.
-
-### 20.4 Company Income Statement
-
-- Project Contract Revenue.
-- Direct Project Costs.
-- Gross Profit.
-- Administrative/General Expenses.
-- Operating Profit.
-
-تعتمد النتائج على Posted Journal Lines فقط.
-
-### 20.5 Chart of Accounts
-
-- Code — Name.
-- English Name.
-- Type.
-- Control Account indicator.
-- Active status.
-
-### 20.6 Accounting Mapping Editor
-
-يسمح بتحديد حساب كل وظيفة محاسبية لكل شركة.
-
-### 20.7 Month-End Closing
-
-Checklist تجريبية تشمل:
-
-- ترحيل فواتير المشتريات.
-- مراجعة مستخلصات العملاء.
-- ترحيل مستخلصات مقاولي الباطن.
-- اعتماد تسويات المخزون.
-- مراجعة البنوك والنقدية.
-- إثبات الاستحقاقات.
-- مراجعة Trial Balance.
-- مراجعة Financial Statements.
-
-## 21. Project Accounting
-
-يتم الوصول إليها من:
-
-```text
-التكاليف والربحية → Project Accounting Dimension
-```
-
-### 21.1 Project Accounting Snapshot
-
-- Contract Revenue.
-- Certified Revenue.
-- Accounting Cost.
-- Committed Cost.
-- Gross Profit.
-- Forecast Profit.
-- Customer Receivable.
-- Retention.
-- Cost Center.
-- WBS.
-
-### 21.2 Project Ledger
-
-- Date.
-- Journal Number.
-- Account Code — Name.
-- Description.
-- Debit.
-- Credit.
-- Running Net Effect.
-- Cost Code.
-- BOQ.
-- Source.
-- Reference.
-
-Journal Number يفتح Journal Drill-down.
-
-### 21.3 Project Trial Balance
-
-- Account Code.
-- Account Name.
-- Opening Debit.
-- Opening Credit.
-- Period Debit.
-- Period Credit.
-- Closing Debit.
-- Closing Credit.
-
-### 21.4 Project Cost Ledger
-
-دفتر إداري تشغيلي منفصل عن Accounting Ledger:
-
-- Date.
-- Project.
-- BOQ.
-- Cost Code.
-- Cost Type.
-- Source.
-- Source Document.
-- Amount.
-
-### 21.5 Project Income Statement
-
-```text
-Project Revenue
-- Materials Cost
-- Labor Cost
-- Equipment Cost
-- Subcontractor Cost
-- Direct Site Expenses
-= Gross Project Profit
-- Allocated Overhead
-= Project Operating Profit
-```
-
-### 21.6 Project Financial Position
-
-- Customer Receivable.
-- Customer Retention.
-- Supplier Payables.
-- Subcontractor Payables.
-- Project Cash/Bank Balance.
-- WIP.
-- Open Commitments.
-- Certified Revenue.
-- Unbilled Work.
-- Accrued Costs.
-- Advances.
-
-### 21.7 Project Journals
-
-- Automatic Journals.
-- Manual Journals.
-- Source Module.
-- Source Number.
-- Status.
-- Total Debit.
-- Drill-down.
-
-### 21.8 Journal Drill-down
-
-يعرض:
-
-- Journal Header.
-- Company.
-- Project Code — Name.
-- Cost Center.
-- Source Module.
-- Source Type.
-- Source Number.
-- Account Code — Name.
-- Cost Code.
-- BOQ.
-- Debit/Credit.
-- Audit Trail.
-- Reverse Action للقيود المرحلة.
-
-## 22. Project Cost Reconciliation
-
-المقارنة:
-
-```text
-Accounting Project Cost
-versus
-Operational Project Cost Ledger
-```
-
-النتيجة الصحيحة:
-
-```text
-Difference = 0
-```
-
-إذا ظهر فرق يتم عرضه كWarning ويجب فحص:
-
-- Source Document غير مرحل.
-- Missing Mapping.
-- Missing Project.
-- Missing Cost Code.
-- Journal Reversal.
-- Manual Journal بدون Operational Source.
-
-في Demo Project `PRJ-026` الفرق الحالي للعمليات المرحلة يساوي صفرًا.
-
-## 23. حساب المستخلص
-
-```text
-Retention = Gross Amount × Retention Rate
-Tax = Gross Amount × Tax Rate
-Net = Gross Amount + Tax - Retention
-Outstanding = max(0, Net - Paid Amount)
-```
-
-النسب لا يجب اعتبارها Policy نهائية، وهي Configurable من البيانات والإعدادات.
-
-## 24. حساب تكلفة المشروع
-
-التكلفة الإدارية الحالية تجمع:
-
-- Historical/Recorded Baseline.
-- Posted Material Issues.
-- Approved/Posted Expenses.
-- Approved/Posted Subcontractor Certificates.
-
-التكلفة المحاسبية في Project Accounting تعتمد على Posted Journal Lines المرتبطة بالمشروع وحسابات التكلفة في Mapping.
-
-## 25. Budget Variance
-
-```text
-Variance = Budget - Actual Cost
-Consumed % = Actual Cost / Budget × 100
-```
-
-## 26. Project Profit
-
-```text
-Earned Revenue = max(Certified Revenue, Contract Value × Progress %)
-Profit = Earned Revenue - Actual Cost
-Margin % = Profit / Earned Revenue × 100
-```
-
-في شاشة Project Accounting يتم أيضًا تحليل الإيراد والتكلفة من القيود المرحلة.
-
-## 27. Project Health Score
-
-Rule-Based Score من `0` إلى `100` يعتمد حاليًا على:
-
-- Budget Consumed vs Physical Progress.
-- Schedule Elapsed vs Physical Progress.
-
-الحالات:
-
-- Healthy.
-- Attention.
-- Critical.
-
-القواعد قابلة للتوسعة لاحقًا لإضافة:
-
-- Cash Flow.
-- Collections.
-- Procurement Delays.
-- Cost Overrun.
-- Customer Overdue.
-
-## 28. قواعد سلامة البيانات
-
-- منع صرف مخزون أكبر من الرصيد عند تفعيل المنع.
-- منع Journal غير متوازن.
-- منع Journal Line بدون حساب صحيح.
-- منع العملية إذا لم يوجد Project مطلوب.
-- منع Auto Journal إذا لم يوجد Accounting Mapping.
-- منع تعديل Posted Journal مباشرة.
-- استخدام Reversal بدل حذف القيد.
-- منع قيد عادي داخل Closed Period.
-- Document Numbers تولد بنمط يمنع التكرار داخل البيانات الحالية.
-- Posted Operational Source يظهر كاستثناء إذا لم يوجد له Journal.
-
-## 29. ترقيم المستندات
-
-أمثلة:
-
-```text
-PO-2026-0001
-GRN-2026-0001
-MAT-ISS-2026-0001
-EXP-2026-0001
-CERT-CUS-2026-0001
-CERT-SUB-2026-0001
-JV-2026-0001
-INV-2026-0001
-PUR-2026-0001
-REV-2026-0001
-```
-
-الترقيم النهائي يجب أن يصبح Configurable لكل شركة بعد تحليل Document Numbering Policy.
-
-## 30. البحث والجداول
-
-`DataTable` الحالية تدعم:
-
-- Global Search.
-- Sorting.
-- Pagination.
-- Responsive horizontal scrolling.
-- Row actions.
-- Record count.
-
-الوحدات الكبيرة يمكن توسيعها لاحقًا بـ:
-
-- Column Visibility.
-- Grouping.
-- Advanced Filters.
-- Saved Views.
-- Row Selection.
-
-## 31. Excel والطباعة
-
-### ExcelJS
-
-التصدير الحالي يدعم تقارير حسب الوحدة، ومن أمثلتها:
-
-- Projects.
-- BOQ.
-- Trial Balance.
-
-### Browser Printing
-
-- Print CSS مخصص.
-- إخفاء Sidebar/Header/Actions.
-- طباعة Cards وTables.
-- يمكن للمستخدم اختيار Save as PDF من المتصفح.
-
-لا يوجد Paid PDF API.
-
-## 32. اللغات واتجاه العرض
-
-### العربية
-
-- `dir="rtl"`.
-- Sidebar RTL.
-- Forms وTables RTL.
-- أرقام مالية واضحة.
-- مواضع Icons تراعي الاتجاه.
-
-### الإنجليزية
-
-- `dir="ltr"`.
-- عناوين Navigation الأساسية مترجمة.
-- يمكن التبديل من زر Language.
-
-ملاحظة: ما زالت بعض النصوص التشغيلية والتقارير التفصيلية عربية، وتحتاج نقلًا كاملًا إلى Translation Dictionaries في Milestone Localization لاحقة.
-
-## 33. التصميم البصري
-
-الهوية:
-
-```text
-Light
-Clean
-Bright
-Premium
-Construction-Oriented
-Engineering
-Financial Control
-```
-
-### الألوان
-
-- White / Off White.
-- Light Concrete Gray.
-- Construction Blue.
-- Engineering Blue.
-- Safety Amber بشكل محدود.
-- Green للنجاح.
-- Red للأخطاء الحرجة فقط.
-
-### الممنوع بصريًا
-
-- Black Main Background.
-- Dark Navy Pages.
-- Purple SaaS Gradients.
-- Neon/Cyberpunk.
-- Gaming UI.
-- Heavy Glassmorphism.
-- صور عمال ورافعات بشكل مبالغ.
-
-### اللغة الهندسية
-
-- Blueprint Grid خفيف.
-- Structural Geometry.
-- Construction Icons.
-- Project Progress Visuals.
-- Financial Control Cards.
-
-## 34. Responsive Design
-
-يدعم:
-
-- Large Desktop.
-- Desktop.
-- Laptop.
-- Tablet.
-- Mobile.
-
-### Desktop
-
-- Fixed light Sidebar.
-- Header selectors.
-- Multi-column metrics.
-- Full tables.
-
-### Mobile
-
-- Drawer navigation.
-- Compact header.
-- Responsive metrics.
-- Horizontal tab scrolling.
-- Horizontal tables.
-- Touch-friendly actions.
-- Dialogs داخل ارتفاع الشاشة.
-
-## 35. حالات الواجهة
-
-التطبيق يدعم حسب الوحدة:
-
-- Loading State.
-- Validation Errors.
-- Success Toasts.
-- Error Toasts.
-- Empty Tables.
-- Disabled Actions.
-- Confirmation قبل الحذف أو Reset.
-- Status Badges.
-- Responsive Dialogs.
-
-## 36. الاختبارات الحالية
-
-يوجد حاليًا 10 اختبارات Business Logic تغطي:
-
-- Certificate retention/tax/net/outstanding.
-- Balanced Journal validation.
-- Unbalanced Journal rejection.
-- Company Trial Balance balance.
-- Inventory receipts/issues balance.
-- Project Cost integration.
-- Budget Variance.
-- Project Health bounds.
-- Automatic Material Issue Journal.
-- Project/Cost Center/BOQ dimensions.
-- Project Ledger.
-- Project Trial Balance.
-- Project Income Statement.
-- Cost Ledger Reconciliation.
-- Journal Reversal.
-
-## 37. أوامر التشغيل
-
-### تثبيت الاعتماديات
-
-```bash
-npm install
-```
-
-### تشغيل Development
-
-```bash
-npm run dev
-```
-
-الرابط المحلي الافتراضي:
-
-```text
-http://localhost:3000
-```
-
-### Type Check
-
-```bash
-npm run typecheck
-```
-
-### Lint
-
-```bash
-npm run lint
-```
-
-### Unit Tests
-
-```bash
-npm test
-```
-
-### Production Build
-
-```bash
-npm run build
-```
-
-### تشغيل Production محليًا
-
-```bash
-npm run start
-```
-
-## 38. Git Workflow
-
-قبل أي Milestone:
-
-```bash
-git status
-git remote -v
-git branch
-```
-
-بوابة الجودة:
-
-```text
-TypeCheck
-  ↓
-Lint
-  ↓
-Tests
-  ↓
-Build
-  ↓
-git status
-  ↓
-Commit
-  ↓
-Push
-```
-
-قواعد Git:
-
-- لا Push للكود المكسور.
-- لا Force Push.
-- لا Destructive Reset.
-- لا حذف تاريخ أو Branches دون طلب صريح.
-- Commit واضح لكل Milestone.
-
-أمثلة Commit Messages:
-
-```text
-feat: initialize interactive construction ERP foundation
-feat: implement integrated project accounting cycle
-feat: implement procurement workflow
-feat: add inventory movement engine
-feat: implement progress certificates
-fix: resolve financial calculation errors
-```
-
-## 39. النشر
-
-المشروع مربوط بـ:
-
-```text
-GitHub Repository
-  ↓
-Vercel Project
-  ↓
-Automatic Production Deployment
-```
-
-رابط الإنتاج العام (اسم النطاق القديم محفوظ لتجنب كسر الروابط، بينما هوية المنتج داخله SiteCost ERP):
-
-<https://binaa-construction-erp.vercel.app/>
-
-لا يستخدم المشروع:
-
-- Vercel Pro.
-- Paid Database.
-- Paid Storage.
-- Paid Analytics.
-- Paid Add-ons.
-
-## 40. Status Matrix
-
-### مكتمل حاليًا
-
-- ✅ Application Foundation.
-- ✅ Light Construction Design System.
-- ✅ Responsive Sidebar/Header.
-- ✅ Local Repository Architecture.
-- ✅ Local Persistence.
-- ✅ Backup/Restore.
-- ✅ Demo Data Migration.
-- ✅ Companies CRUD.
-- ✅ Projects CRUD.
-- ✅ Customers/Suppliers/Subcontractors CRUD.
-- ✅ Basic BOQ.
-- ✅ Purchase Orders.
-- ✅ Inventory Movements.
-- ✅ Negative Stock Rule.
-- ✅ Project Expenses.
-- ✅ Customer/Subcontractor Certificates.
-- ✅ Chart of Accounts Prototype.
-- ✅ Company Accounting Mapping.
-- ✅ Manual Balanced Journal.
-- ✅ Automatic Operational Journals.
-- ✅ General Ledger.
-- ✅ Trial Balance.
-- ✅ Company Income Statement Prototype.
-- ✅ Project Ledger.
-- ✅ Project Trial Balance.
-- ✅ Project Cost Ledger.
-- ✅ Project Income Statement.
-- ✅ Project Financial Position.
-- ✅ Project Journal Drill-down.
-- ✅ Journal Audit Trail.
-- ✅ Journal Reversal.
-- ✅ Project Cost Reconciliation.
-- ✅ Month-End Checklist Prototype.
-- ✅ Executive Dashboard.
-- ✅ Excel Export Prototype.
-- ✅ Browser Print/PDF.
-- ✅ Arabic RTL / English LTR Shell.
-- ✅ Vercel Production Deployment.
-
-### جزئي ويحتاج توسعة
-
-- 🟡 Rate Analysis التفصيلي.
-- 🟡 Budget by Cost Code/BOQ.
-- 🟡 Procurement يبدأ من PO حاليًا ولا يغطي الدورة كاملة.
-- 🟡 Documents Metadata دون File Storage.
-- 🟡 Company Income Statement يحتاج كل أنواع الحسابات والقيود.
-- 🟡 Fiscal Period Rules Prototype.
-- 🟡 Localization لبعض النصوص التفصيلية.
-- 🟡 Global Search الحالي UI ولم يتم فهرسة جميع الوحدات بعد.
-- 🟡 User/Roles/Permissions لم تتحول بعد لمحرك كامل.
-
-### غير منفذ بعد
-
-- ⬜ Tendering Workflow.
-- ⬜ Contracts and Variation Orders.
-- ⬜ Purchase Requests.
-- ⬜ RFQs.
-- ⬜ Supplier Quotations.
-- ⬜ Quotation Comparison.
-- ⬜ Supplier Invoices.
-- ⬜ Treasury and Bank Transactions.
-- ⬜ Collections and Payments Workflow.
-- ⬜ Cheques and Guarantees.
-- ⬜ Employee Advances.
-- ⬜ Customer/Supplier/Subcontractor Subsidiary Ledgers الكاملة.
-- ⬜ Balance Sheet الكاملة.
-- ⬜ Cash Flow Statement الكاملة.
-- ⬜ Adjusted Trial Balance.
-- ⬜ Adjusting Entry Types UI.
-- ⬜ Post-Closing Trial Balance.
-- ⬜ Year-End Closing.
-- ⬜ Bank Reconciliation.
-- ⬜ Cash Count.
-- ⬜ Customer/Supplier Reconciliation.
-- ⬜ Indirect Cost Allocation Engine.
-- ⬜ Allocation Report.
-- ⬜ Project Profit Before/After Allocation.
-- ⬜ Payroll/Labor.
-- ⬜ Equipment/Maintenance.
-- ⬜ Site Daily Reports.
-- ⬜ Progress Tracking تفاصيل التنفيذ.
-- ⬜ Gantt.
-- ⬜ WIP Accounting Method Configuration.
-- ⬜ Cash Flow Forecast.
-- ⬜ EAC/ETC/VAC Forecasting الكامل.
-- ⬜ Fraud and Error Radar الكامل.
-- ⬜ Advanced Approval Engine.
-- ⬜ Notifications Center الكامل.
-- ⬜ Owner Mobile Dashboard مستقل.
-- ⬜ Production Authentication.
-- ⬜ Production Backend/Database/File Storage.
-
-## 41. خارطة الطريق
-
-### Milestone A — Procurement Cycle
-
-```text
-Purchase Request
-  ↓
-RFQ
-  ↓
-Supplier Quotations
-  ↓
-Comparison
-  ↓
-Approval
-  ↓
-Purchase Order
-  ↓
-Receipt
-  ↓
-Supplier Invoice
-  ↓
-Accounting
-```
-
-### Milestone B — Treasury
-
-- Cash Accounts.
-- Bank Accounts.
-- Customer Collections.
-- Supplier Payments.
-- Subcontractor Payments.
-- Cash/Bank Vouchers.
-- Cheques.
-- Advances.
-- Automatic Journals.
-
-### Milestone C — Full Financial Statements
-
-- Adjusting Entries.
-- Adjusted Trial Balance.
-- Balance Sheet.
-- Cash Flow Statement.
-- Closing Entries.
-- Post-Closing Trial Balance.
-- Period Locking and Reopening permissions.
-
-### Milestone D — Project Controls
-
-- Rate Analysis.
-- Budget by BOQ/Cost Code.
-- Progress Measurement.
-- Variation Orders.
-- WIP Accounting.
-- ETC/EAC/VAC.
-- Cash Flow Forecast.
-- Project Contribution Comparison.
-
-### Milestone E — Controls and Governance
-
-- Approval Workflow.
-- Roles and Permissions.
-- Complete Audit Trail.
-- Accounting Exceptions.
-- Fraud/Error Rules.
-- Notifications.
-- Closing Dashboard.
-
-### Milestone F — Backend Discovery
-
-لا يبدأ قبل الاجتماع مع شركة المقاولات وتوثيق:
-
-- دورة المستندات.
-- Approval Matrix.
-- User Roles.
-- Tax Rules.
-- Accounting Policies.
-- Project Costing Policy.
-- WIP/Revenue Recognition Policy.
-- Retention Policy.
-- Numbering Policy.
-- Fiscal Period Policy.
-- Required Reports.
-- Required Attachments.
-
-## 42. أسئلة اجتماع شركة المقاولات
-
-### المشروعات والعقود
-
-- ما أنواع العقود المستخدمة؟
-- هل العقد Lump Sum أم Unit Price أم Cost Plus؟
-- كيف يتم التعامل مع Variation Orders؟
-- هل المشروع Cost Center واحد أم Hierarchy؟
-- ما هي بنية WBS الفعلية؟
-
-### المقايسات والتكلفة
-
-- كيف يتم ترميز BOQ؟
-- هل Cost Codes موحدة على الشركة؟
-- كيف يتم عمل Rate Analysis؟
-- كيف توزع المصروفات غير المباشرة؟
-- هل توجد Opening Costs عند نقل مشروع قائم؟
-
-### المشتريات
-
-- من يطلب ومن يعتمد؟
-- هل RFQ إلزامي؟
-- كم عرض سعر مطلوب؟
-- كيف يتم تقييم المورد؟
-- متى يتم إثبات المورد: عند الاستلام أم الفاتورة؟
-
-### المخازن
-
-- هل يسمح Negative Stock؟
-- ما طريقة تقييم المخزون؟
-- هل المخزن تابع للمشروع أم الشركة؟
-- هل التحويل بين المشاريع مسموح؟
-- كيف يتم التعامل مع الهالك والمرتجعات؟
-
-### المستخلصات
-
-- كيف يتم حساب Retention؟
-- ما الضرائب والخصومات؟
-- هل يوجد Advance Recovery؟
-- هل الإيراد يعترف به بالمستخلص أم Percentage of Completion؟
-
-### المحاسبة
-
-- ما دليل الحسابات الحالي؟
-- هل يوجد Project Dimension في النظام الحالي؟
-- كيف يتم إثبات WIP؟
-- ما قواعد الإقفال الشهري؟
-- كيف تعالج Accruals؟
-- كيف يتم توزيع Head Office Overhead؟
-- هل توجد قيود تلقائية حالية؟
-
-### الخزينة
-
-- ما الصناديق والبنوك؟
-- كيف تتم التحصيلات والمدفوعات؟
-- هل تستخدم شيكات آجلة؟
-- كيف تتم Bank Reconciliation؟
-- كيف تتم تسوية Employee Advances؟
-
-### الصلاحيات
-
-- من ينشئ؟
-- من يراجع؟
-- من يعتمد؟
-- من يرحل؟
-- من يعكس القيد؟
-- من يعيد فتح فترة مغلقة؟
-
-## 43. Definition of Done لأي Module
-
-لا تعتبر الوحدة مكتملة بمجرد وجود صفحة. يجب حسب طبيعتها أن تحتوي على:
-
-- List View.
-- Details View.
-- Create.
-- Edit.
-- Delete/Archive/Cancel حسب Workflow.
-- Validation.
-- Persistence.
-- Business Logic.
-- Related Data Integration.
-- Accounting Impact عند الحاجة.
-- Responsive UX.
-- RTL/LTR.
-- Error Handling.
-- Empty State.
-- Loading/Disabled State.
-- Search/Filter.
-- Print/Export عند الحاجة.
-- Tests.
-- Build Verification.
-
-## 44. شروط الانتقال إلى Backend
-
-لا يتم تصميم Database نهائية إلا بعد:
-
-1. توثيق الدورة الفعلية للشركة.
-2. اعتماد Business Glossary.
-3. اعتماد Chart of Accounts.
-4. اعتماد Project/Cost Center/WBS hierarchy.
-5. اعتماد المستندات وترقيمها.
-6. اعتماد Journal Mappings.
-7. اعتماد Approval Matrix.
-8. اعتماد Taxes/Retention policies.
-9. اعتماد Closing and Period rules.
-10. اعتماد Reporting requirements.
-
-بعدها يتم تصميم:
-
-- API Contracts.
-- Database Schema.
-- Authentication.
-- Authorization.
-- File Storage.
-- Audit Infrastructure.
-- Backup and Disaster Recovery.
-- Production Hosting Architecture.
-
-## 45. Prototype Notice
-
-```text
-Current prototype stores business data locally in the browser.
-
-This is intentionally temporary until the real construction company's
-workflows and backend requirements are fully analyzed.
-```
-
-## 46. قواعد الحفاظ على المشروع
-
-- لا تضف Database حقيقية قبل اعتماد التحليل.
-- لا تضع الحسابات داخل JSX.
-- لا تستخدم LocalStorage مباشرة داخل Components.
-- لا Hardcode Account Mapping داخل عمليات التشغيل.
-- لا تحذف Posted Transactions.
-- لا تستخدم Paid Services دون موافقة صريحة.
-- لا تغير الـStack دون ضرورة واضحة.
-- لا تضف مكتبات إذا كان الـStack الحالي يكفي.
-- حافظ على Strict TypeScript.
-- أضف اختبارات لأي Business Rule جديد.
-- حدث هذه الوثيقة وREADME مع كل Milestone.
-- نفذ TypeCheck وLint وTests وBuild قبل Push.
-
-## 47. دمج الدورة المستندية والمحاسبية داخل الـCore
-
-تم اعتماد المبدأ التالي كمعمارية أساسية للنظام:
-
-```text
-DOCUMENT → OPERATION → ACCOUNTING → PROJECT → COMPANY → REPORTING
-```
-
-### المكونات المنفذة في الـCore
-
-- Accounting Documents Register موحد مع رقم المصدر ونوع المستند والشركة والمشروع والطرف والضريبة والصافي والحالات والقيد المرتبط.
-- فصل Workflow Status عن Accounting Status وعن Settlement Status.
-- تسجيل بيانات الفاتورة أو المستند فعليًا بعد اختيار المرفق، مع حفظ File Name وFile Type وFile Size وUpload Date وRelated Document.
-- FileStorageProvider قابل للتوسعة مستقبلًا إلى رفع وحذف الملفات الحقيقية.
-- Accounting Mapping مستقل لكل شركة، ويستخدم لتوليد القيود بدل الحسابات المكتوبة Hardcoded.
-- إدخالات المصروفات والمستخلصات وحركات المخزون التشغيلية تسجل Source Document داخل المركز وتولد Draft Journal للمراجعة؛ واستلام المواد يحترم سياسة Supplier Liability Recognition.
-- توليد Draft Journal من المستند المعتمد، ثم دورة Draft → Reviewed → Posted.
-- منع الترحيل داخل فترة محاسبية Closed.
-- قيد يدوي متعدد السطور بلا حد، مع Company وProject وCost Center وCost Code وWBS وDescription على مستوى السطر.
-- قفل القيود المرحلة ومنع تعديلها أو حذفها المباشر، مع استمرار مسار القيد العكسي.
-- Collections وSupplier Payments وSubcontractor Payments مع تخصيص يدوي أو Auto Allocate Oldest.
-- دعم Partial Settlement وتحديث Outstanding وSettlement Status تلقائيًا.
-- Open Items Register وأعمار الذمم: Current و1-30 و31-60 و61-90 و91-120 و120+.
-- Accountant Workspace للشركة وProject Accountant Workspace لكل مشروع.
-- Accounting Exception Center للمستندات بلا قيود، القيود غير المتوازنة، القيود المعلقة، Cost Code المفقود والدفعات غير المخصصة.
-- Company وProject financial statements من Posted Journal Lines فقط، وتشمل Income Statement وBalance Sheet وCash Flow summary.
-- سياسات قابلة للضبط تشمل Supplier Liability Recognition وRevenue Recognition وOverhead Allocation.
-- ترقيم مستقل حسب الشركة ونوع المستند والسنة.
-- ترقية تلقائية للبيانات المحفوظة محليًا لإضافة الكيانات الجديدة دون فقد السجلات السابقة.
-
-### أنواع المستندات المدعومة في نموذج التسجيل
-
-```text
-Supplier Invoice
-Expense Invoice
-Customer Certificate
-Subcontractor Certificate
-Cash Receipt
-Cash Payment
-Bank Receipt
-Bank Payment
-Credit Note
-Debit Note
-Inventory Adjustment
-Opening Balance
-```
-
-### حالة التنفيذ المتقدم
-
-| الجزء | الحالة |
+| التقرير | الحالة |
 | --- | --- |
-| Document Register ودورة المراجعة | ✅ منفذ |
-| Draft Journal من Accounting Mapping | ✅ منفذ |
-| Unlimited Multi-Line Journal | ✅ منفذ |
-| Journal Review وPosting وPeriod Lock | ✅ منفذ |
-| Open Items وPartial Allocation وAging | ✅ منفذ |
-| Company / Project Accountant Workspace | ✅ منفذ |
-| Exceptions وTraceability إلى القيد والمصدر | ✅ منفذ كأساس تفاعلي |
-| قوائم مالية من Posted Lines | ✅ منفذ كأساس تفاعلي |
-| Opening Balance document وOpening journal type | ✅ منفذ كأساس إدخال وتصنيف |
-| Bank/Cash/Party reconciliation التفصيلي | 🟡 يحتاج شاشات مطابقة متقدمة |
-| Adjusted Trial Balance وAdjusting Register مستقل | 🟡 خدمة القيود موجودة والتقرير المستقل قادم |
-| Closing Entries وPost-Closing Trial Balance | 🟡 دورة الفترات وقائمة الإقفال موجودتان والتوليد التفصيلي قادم |
-| Year-End carry forward | ⬜ خارطة طريق |
-| Tax rules متعددة الأكواد لكل شركة | 🟡 الحقول موجودة ومحرك القواعد المتقدم قادم |
-| File Storage حقيقي | ⬜ خارج نطاق النموذج المحلي الحالي |
+| قائمة الدخل | ✅ منفذة من القيود المرحلة |
+| الميزانية العمومية | ✅ منفذة مع Balance validation |
+| التدفقات النقدية | ✅ منفذة مع Cash reconciliation |
+| التغير في حقوق الملكية | ✅ منفذة من الحسابات المصنفة |
+| ميزان المراجعة التفصيلي | ✅ Opening/Movement/Closing |
+| ميزان المراجعة المعدل | ✅ يفصل Adjustment journals |
+| ميزان ما بعد الإقفال | ✅ يخفي الحسابات المؤقتة بعد Closing entries |
+| Year-end carry forward | ⬜ غير منفذ |
 
-### اختبارات الدورة الجديدة
+لا تظهر الأرقام إن لم ينشئ المستخدم Accounts وPosted Journals. التوازن المحاسبي واختبارات الاستبعاد للقيود غير المرحلة منفذة.
 
-تغطي الاختبارات الآلية:
+## 18. حسابات المشروعات
 
-- الترقيم المستقل للمستندات.
-- توليد قيد متوازن من Mapping الشركة.
-- دورة Draft → Reviewed → Posted وربط حالة المستند بالقيد.
-- السداد الجزئي وتحديث الرصيد المفتوح.
-- استبعاد القيود غير المرحلة من القوائم المالية.
+لكل مشروع أساس تفاعلي مستقل:
+
+- Project journal entries وledger.
+- Project trial balance.
+- Operational project cost ledger.
+- Project income statement.
+- Project financial position؛ لا يسمى Project Balance Sheet تضليلًا.
+- Receivables/Payables/Cash dimensions حسب السطور المتاحة.
+- Profitability وCost reconciliation.
+
+```text
+Company Financials
+= Project Transactions
++ Company-Level Transactions
++ Adjustments / Allocations available in the ledger
+```
+
+Forecast/EAC/ETC/Committed وHead-office allocation المتقدمة ما زالت جزئية.
+
+## 19. الواجهة والتنقل
+
+- Arabic RTL وEnglish LTR shell.
+- Accounting navigation مقسمة: العمليات اليومية، الأستاذ والذمم، القوائم، نهاية الفترة، الإعداد والرقابة.
+- Responsive sidebar drawer.
+- Company/Project/Fiscal Period context.
+- جداول بها Search/Sort/Pagination كأساس عبر TanStack Table.
+- Print وExcel أساسيات.
+- Global Search الشامل عبر كل الكيانات غير مكتمل؛ حقل الواجهة موجود فقط ويجب عدم اعتباره Feature مكتملة.
+- يوجد عدد من نصوص الوحدات التشغيلية التي تحتاج استكمال Translation Dictionary كامل.
+
+## 20. البيانات التجريبية
+
+ملف `src/data/demo-data.ts` باقٍ فقط للاختبارات وأداة Prototype الاختيارية. لا يُستورد لتكوين Fresh Data، ولا يعمل تلقائيًا. تشغيل الأداة يحتاج Confirmation واضحًا بأنها ستستبدل البيانات الحالية ببيانات تجريبية.
+
+## 21. الاختبارات والتحقق
+
+### Automated
+
+- Vitest: **35/35** اختبارًا ناجحًا في 5 ملفات.
+- محرك المستخلصات التراكمية.
+- قواعد المخزون والتكلفة والربحية.
+- توليد القيود والدورة المحاسبية.
+- القوائم والتوازن والتدفق النقدي.
+- Fresh data empty.
+- عدم Demo injection أثناء migration.
+- Password policy وsalted hash وlogin verification success/failure.
+- Company access representation.
+
+### Fresh Browser E2E المنفذ
+
+```text
+Fresh context
+  → Setup only, no Sidebar, no Atlas
+  → Enter company
+  → Upload PNG logo
+  → Create administrator
+  → Finish
+  → Login card + construction visual
+  → Login
+  → Projects/Customers/Suppliers/Journals = 0
+  → Plain password absent from LocalStorage
+  → Mobile width 390px without horizontal overflow
+  → Logout returns to Login
+```
+
+### آخر Quality Gate
+
+| الفحص | النتيجة |
+| --- | --- |
+| TypeScript strict | ✅ ناجح |
+| ESLint `--max-warnings=0` | ✅ ناجح |
+| Vitest | ✅ 35/35 |
+| Next.js production build | ✅ ناجح |
+
+## 22. مصفوفة الحالة الصادقة
+
+| المجال | الحالة | ملاحظة |
+| --- | --- | --- |
+| Branding/Metadata/Manifest | ✅ | مركزي ومستخدم |
+| Fresh empty installation | ✅ | لا Demo auto seed |
+| Setup + logo + first admin | ✅ | خمس خطوات |
+| Local hash/login/session/logout | ✅ Prototype | ليس Production Auth |
+| Empty dashboard/checklist | ✅ | صفر دون Fake KPI |
+| Safe legacy migration | ✅ | يحفظ البيانات ولا يحقن Demo |
+| Companies/Parties CRUD | 🟡 | الأساس؛ الحقول والملفات المتقدمة لاحقة |
+| Project setup | 🟡 | CRUD موجود؛ Wizard الكامل لاحق |
+| Contracts/Variations | 🟡 | الأساس التفاعلي موجود؛ Change Events لاحقة |
+| WBS/Cost Codes | 🟡 | hierarchy أساسي؛ drag/drop وعمليات موسعة لاحقة |
+| BOQ/Rate Analysis/Budget versions | 🟡 | BOQ أساسي؛ التحليل والنسخ غير مكتملين |
+| Procurement | 🟡 | PO/receipt؛ PR/RFQ/comparison/matching غير مكتملة |
+| Warehouses/Inventory | 🟡 | master والحركات الأساسية؛ الرقابة المتقدمة لاحقة |
+| Cumulative Certificates | ✅ للطرق A/B | الطرق C/D/E جزئية |
+| Accounting document cycle | ✅ كأساس | workflows الإنتاجية تحتاج اعتماد الشركة |
+| Open items/settlements/aging | ✅ كأساس | reconciliations المتقدمة جزئية |
+| Financial statements | ✅ كأساس | Year-end carry forward غير منفذ |
+| Project accounting | ✅ كأساس | Forecast/allocations المتقدمة جزئية |
+| Treasury/Bank reconciliation | 🟡 | المسار موجود؛ الشيكات والمطابقة والجرد جزئية |
+| Reporting workspace | 🟡 | قوائم مالية قوية؛ مركز تقارير كل الوحدات لاحق |
+| Global search | ⬜ | الحقل موجود دون محرك شامل |
+| Users & RBAC | 🟡 | First owner فقط؛ شاشة الإدارة والصلاحيات لاحقة |
+| Feedback mode | ⬜ | غير منفذ |
+| Labor/Equipment/Site execution | ⬜ | خارطة طريق |
+| Backend/DB/real files | ⬜ خارج النطاق | بعد اعتماد التحليل |
+
+## 23. الأعمال المتبقية حسب الأولوية
+
+1. Project Creation Wizard الكامل وعزل صلاحيات المستخدم الفعلية.
+2. Chart of Accounts وOpening Balances UX كاملان من إدخال المستخدم.
+3. PR/RFQ/quotation comparison/PO/invoice matching.
+4. Warehouse reservations/transfers/count/waste/reconciliation.
+5. Detailed budgets وversions وCommitted/ETC/EAC/Forecast.
+6. Labor/Equipment/Daily Site/Physical Progress.
+7. Treasury checks وBank Reconciliation وCash Count.
+8. User Management/Roles/Approvals/Audit permissions.
+9. Global Search ومحرك Reporting Workspace موحد.
+10. Feedback Mode ثم Backend architecture بعد اعتماد الشركة.
+
+## 24. حدود النموذج
+
+- Local browser data غير مشتركة بين الأجهزة.
+- مسح Browser storage يمسح البيانات ما لم توجد Backup.
+- لا توجد مصادقة إنتاجية أو حماية Server-side.
+- لا يوجد File Storage حقيقي.
+- لا توجد ضرائب أو تشريعات نهائية قبل اعتماد الشركة والدولة.
+- لا تعتبر هذه النسخة نظام محاسبة إنتاجيًا دون مراجعة محاسب الشركة واعتماد دليل الحسابات والسياسات والمستندات والصلاحيات.
+
+## 25. Git والنشر
+
+- Remote الرسمي: `https://github.com/AhmedMohamed500/Contracting-Project.git`.
+- ممنوع Force Push أو Destructive Reset.
+- كل Stable milestone تمر عبر typecheck وlint وtests وbuild.
+- Vercel مرتبط بالمستودع ولا يستخدم خدمات مدفوعة أو Database.
+- يجب اختبار Production في Fresh/Incognito browser لتجنب LocalStorage قديمة.
 
 ---
 
-آخر تحديث لهذه الوثيقة: **22 أغسطس 2026**.
-
-## 48. Milestone — SiteCost ERP Audit Completion (22 أغسطس 2026)
-
-### الهوية والتهيئة
-
-- توحيد الاسم إلى **SiteCost ERP** والاسم المختصر **SiteCost** والوصف: **Construction Financial & Project Control System** من ملف Branding مركزي.
-- إضافة Setup Wizard من أربع خطوات: الترحيب، بيانات الشركة، الإعدادات المالية، بدء النظام.
-- إضافة Company / Project / Fiscal Period Context في الشريط العلوي، مع تصفية المشروعات والأطراف ومدخلات العمليات ودليل الحسابات حسب الشركة.
-- نقل مفتاح التخزين المحلي إلى `sitecost-erp-data-v2` مع قراءة المفتاح القديم وترقيته وحفظه تحت المفتاح الجديد دون حذف بيانات المستخدم القديمة.
-
-### العقود والهياكل والمخازن
-
-- سجل عقود المشروع: القيمة الأصلية، الدفعة المقدمة، الاحتجاز، التواريخ، Tax Mode، Payment Terms، والقيمة المعدلة.
-- سجل Variation Orders مرتبط بالعقد؛ لا تدخل قيمة التغيير في Revised Contract Value إلا بعد الاعتماد.
-- WBS وCost Codes بهيكل Parent/Child، إضافة مستويات، إعادة ترتيب، أرشفة، وعرض شجري.
-- Warehouse Master يشمل النوع، المشروع، العنوان، المسؤول، حالة النشاط، والرصيد الفعلي والمحجوز والمتاح، مع تبويبات تشغيلية واضحة للتوسعة التالية.
-
-### محرك المستخلصات التراكمية
-
-- مستخلصات العميل ومقاول الباطن في شاشة واحدة مع فصل التاريخ حسب النوع والمشروع.
-- السابق يُجلب تلقائيًا من آخر مستخلص، والحالي = التراكمي الحالي − السابق.
-- منع التراكمي الأقل من السابق، ومنع تجاوز 100%، وقفل أي مستخلص لاحق بعد المستخلص النهائي.
-- دعم حساب Overall % ودعم BOQ Quantities، مع منع كمية البند التراكمية من تجاوز كمية العقد.
-- خصومات تفصيلية: استرداد دفعة مقدمة، احتجاز، خصم منبع، مواد، معدات، غرامات، وخصومات أخرى.
-- إنشاء Accounting Document للمستخلص بحالة Submitted ليكمل دورة المراجعة والاعتماد والقيد داخل Accounting Core.
-
-### مصفوفة حالة هذا التدقيق
-
-| المجال | الحالة الحالية |
-| --- | --- |
-| Branding + Setup + Safe Migration | ✅ منفذ |
-| Company/Project/Period Context | ✅ منفذ كأساس تفاعلي |
-| Contracts + Variation Orders | ✅ منفذ كأساس تفاعلي |
-| WBS + Cost Codes hierarchy | ✅ منفذ كأساس تفاعلي |
-| Warehouse Master + stock views | 🟡 الدليل والأرصدة منفذة؛ مستندات التحويل/الحجز التفصيلية لاحقة |
-| Cumulative Certificates methods A/B | ✅ منفذ مع Validation واختبارات |
-| Certificate methods C/D/E | 🟡 ظاهرة في الاختيار وتحتاج محركات التسعير المتخصصة |
-| Accounting Core + Open Items + Statements | ✅ منفذ كأساس تفاعلي |
-| Backend/Auth/RBAC/Production DB/File Upload | ⬜ خارج النموذج المحلي الحالي ويتطلب مرحلة Backend معتمدة |
-
-### تحقق الجودة
-
-- TypeScript strict: ناجح.
-- ESLint بلا تحذيرات: ناجح.
-- Vitest: **22 اختبارًا ناجحًا**، تشمل الدورة المحاسبية وقواعد المستخلصات التراكمية.
-- Next.js production build: ناجح.
-
-## 49. إعادة تنظيم تجربة الحسابات والقوائم المالية
-
-### Information Architecture
-
-أُعيد تنظيم قسم **الحسابات والمالية** إلى مسارات Sidebar مستقلة بدل تجميع الوظائف في شريط Tabs واحد:
-
-- لوحة المحاسب.
-- العمليات اليومية: المستندات المحاسبية، القيود اليومية، الخزينة والبنوك، التسويات.
-- الأستاذ والذمم: الأستاذ العام، الأستاذ المساعد، الذمم المدينة، الذمم الدائنة.
-- القوائم: ميزان المراجعة، قائمة الدخل، الميزانية العمومية، التدفقات النقدية، والتغير في حقوق الملكية.
-- نهاية الفترة: ميزان المراجعة المعدل، الإقفالات، وميزان ما بعد الإقفال.
-- الإعداد والرقابة: دليل الحسابات، مراكز التكلفة، ربط الحسابات، الرقابة المحاسبية وتكاليف المشاريع.
-
-### مصدر التقارير وتصنيف الحسابات
-
-كل القوائم الجديدة تعتمد فقط على:
-
-```text
-Posted Journal Lines
-+ Chart of Accounts Classification
-```
-
-أضيفت إلى الحسابات خصائص `statementType` و`statementSection` و`normalBalance` و`cashFlowCategory`، مع ترقية آمنة للحسابات المحفوظة سابقًا. توسع دليل Demo ليشمل الأصول والخصوم وحقوق الملكية والإيرادات وتكاليف المشاريع والمصروفات التشغيلية والإيرادات والمصروفات الأخرى.
-
-### التقارير المنفذة فعليًا
-
-| التقرير | الحالة الواقعية |
-| --- | --- |
-| قائمة الدخل بتقسيم الإيراد والتكلفة والمصروفات وصافي الربح | ✅ منفذ من القيود المرحلة |
-| الميزانية العمومية ومقارنة الأصول بالخصوم وحقوق الملكية | ✅ منفذ مع Validation وDrill-down للحساب والقيد |
-| قائمة التدفقات النقدية | ✅ منفذة مع Operating/Investing/Financing ومطابقة رصيد النقدية والبنوك |
-| قائمة التغير في حقوق الملكية | ✅ منفذة من الحسابات المتاحة دون أرقام وهمية |
-| ميزان المراجعة Opening/Movement/Closing | ✅ منفذ مع شجرة Expand/Collapse |
-| ميزان المراجعة المعدل | ✅ يفصل قيود التسوية المرحلة عن الميزان السابق للتسوية |
-| ميزان ما بعد الإقفال | ✅ يخفي أرصدة حسابات الإيراد والتكلفة والمصروف بعد الإقفال |
-| المركز المالي للمشروع | ✅ يعرض فقط الأرصدة الحاملة لبُعد المشروع ولا يُسمى ميزانية عمومية للمشروع |
-| مقارنة الفترة الحالية بالفترة السابقة | ✅ منفذة في مركز القوائم |
-| طباعة وExcel منظم | ✅ منفذ كأساس يحافظ على العناوين والأقسام والإجماليات |
-| Drill-down طرف ← مستند ← قيد كامل | 🟡 الحساب ← سطور القيود والمستند منفذ؛ ملف الطرف متعدد المستويات يحتاج شاشة تفصيلية لاحقة |
-| الخزينة والبنوك والمطابقات المتقدمة | 🟡 لها مسار مستقل وتستخدم سجل التسويات الحالي؛ الشيكات والجرد والمطابقة البنكية التفصيلية لاحقة |
-| Reports Center شامل لكل الوحدات | ⬜ لم يُكرر منطق القوائم؛ مركز التقارير متعدد الوحدات مرحلة مستقلة لاحقة |
-
-### إعادة تنظيم المستخلصات
-
-- تعريب العناوين والأزرار والجداول حسب لغة النظام.
-- Header وKPIs موحدة للعقود والمعتمد والمحصل والمتبقي والاحتجازات.
-- فلاتر مشروع قابلة للبحث، ونوع المستخلص، والحالة.
-- Timeline للمستخلصات يعرض الحالي والتراكمي والصافي وحالة التحصيل.
-- Certificate Wizard من ست خطوات بدل Dialog مزدحمة.
-- إدخال النسبة التراكمية الجديدة يعرض السابق والحالي والتراكمي والمتبقي وقيم الأعمال فورًا.
-- الحساب يستخدم Revised Contract Value بعد التغييرات المعتمدة.
-- الحفظ ينشئ Accounting Document مرسلًا للمراجعة ولا يرحّل قيدًا مباشرة.
-
-### اختبارات القبول الحالية
-
-- سيناريو المستخلصات `20% → 35% → 50%` يعطي حركات `20%، 15%، 15%` بشكل مستقل لكل مشروع.
-- إجمالي مدين ميزان المراجعة يساوي إجمالي الدائن.
-- الأصول تساوي الخصوم وحقوق الملكية وصافي ربح الفترة في بيانات Demo.
-- رصيد التدفق النقدي الختامي يطابق النقدية والبنوك في الميزانية.
-- القيود غير المرحلة مستبعدة من جميع القوائم.
-- الإجمالي الحالي: **29 اختبارًا آليًا ناجحًا**.
+آخر تحديث: **23 أغسطس 2026**.

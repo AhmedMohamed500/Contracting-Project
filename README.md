@@ -1,37 +1,121 @@
 # SiteCost ERP
 
-التوثيق العربي الشامل للمشروع: [PROJECT_DOCUMENTATION_AR.md](./PROJECT_DOCUMENTATION_AR.md)
+**Construction Financial & Project Control System**<br>
+**نظام إدارة وتكاليف ومراقبة مشاريع المقاولات**
 
-Construction Financial & Project Control System — an interactive, local-first ERP prototype for construction companies, contractors, engineering offices, and project-control teams. The current milestone connects company and project master data with contracts, WBS, cost codes, warehouses, BOQ, procurement, inventory, expenses, cumulative certificates, accounting, costing, documents, and the executive dashboard.
+نموذج ERP تفاعلي محلي لشركات المقاولات يربط بيانات الشركات والمشروعات والعقود وWBS وأكواد التكلفة والمخازن والمستخلصات بالدورة المحاسبية والقوائم المالية. التوثيق العربي الكامل موجود في [PROJECT_DOCUMENTATION_AR.md](./PROJECT_DOCUMENTATION_AR.md).
 
-The accounting cycle is part of the core architecture: source documents are registered first, classified through company mappings, converted to reviewable draft journals, posted to the shared ledger, and traced into open items, aging and financial statements.
+## First Run Setup
+
+Fresh installations start completely empty. لا تُحمّل أي شركة أو عميل أو مورد أو مشروع أو حركة Demo تلقائيًا.
+
+```text
+No company
+  → Company setup
+  → Optional company logo
+  → Financial defaults
+  → Create first administrator
+  → Review and finish
+  → Login
+  → Empty ERP + Getting Started checklist
+```
+
+يدخل المستخدم بيانات شركته بنفسه. Sample Data اختيارية فقط من أدوات الـPrototype داخل Settings وبعد رسالة تحذير صريحة.
+
+## Company Logo
+
+- PNG وJPG وWEBP فقط.
+- حد أقصى 400 KB.
+- يُحفظ كـData URL خفيف داخل بيانات النموذج المحلي.
+- يظهر في Setup وLogin وهوية النظام.
+- المستندات الكبيرة لا تُحفظ داخل LocalStorage؛ النظام يحفظ Metadata فقط حاليًا.
+
+## Local Authentication
+
+- أول Admin ينشئه المستخدم أثناء Setup.
+- كلمة المرور لا تُحفظ Plain Text.
+- يستخدم النموذج Web Crypto PBKDF2 + SHA-256 + random salt و120,000 iteration.
+- Session منفصلة في `sessionStorage`، وLogout يمسح Session فقط دون بيانات الشركة.
+- الخطأ لا يكشف هل اسم المستخدم أم كلمة المرور هو غير الصحيح.
+
+> Current authentication is prototype-only and stored locally. It must be replaced with server-side authentication when the production backend architecture is approved.
+
+## User-Owned Data
+
+The user supplies the business data. SiteCost ERP supplies validation, calculations, workflow, accounting, project costing, reconciliation, reporting, and control.
+
+بعد أول Login تكون أعداد العملاء والموردين ومقاولي الباطن والمشروعات والمخازن والمواد والمستخلصات والفواتير والقيود صفرًا. Dashboard لا تعرض أرقامًا تجريبية؛ وتعرض قائمة **ابدأ من هنا**.
 
 ## Architecture
 
 ```text
-Presentation (Next.js / React)
+Next.js / React UI
   → Application actions
-  → Business calculation services
+  → Business and accounting services
   → Repository interfaces
-  → LocalStorage repository (temporary prototype)
+  → LocalStorage repositories (prototype only)
 ```
 
-Business calculations live outside React components. `ErpRepository` can later be implemented by an API repository without rewriting the user interface or calculation engine. `FileStorageProvider` is represented as an interface; the prototype intentionally stores attachment metadata only.
+- لا يوجد Database أو Backend API أو خدمة مدفوعة.
+- لا تستخدم Components `localStorage` أو `sessionStorage` مباشرة.
+- يمكن استبدال Repository المحلي لاحقًا بـAPI repository دون نقل قواعد الحساب إلى JSX.
+- Storage key الحالي: `sitecost-erp-data-v2`.
+- المفتاح القديم `binaa-erp-data-v1` يُقرأ ويُرقّى دون حذفه تلقائيًا.
+- الـNormalization لا يحقن Demo accounts أو journals أو documents في بيانات المستخدم.
 
-## Technology
+## Cumulative Certificates
 
-Next.js, React, strict TypeScript, Tailwind CSS, Radix primitives, Lucide React, React Hook Form, Zod, TanStack Table, Zustand, Apache ECharts, ExcelJS, date-fns, Vitest, and Playwright. All core dependencies are free/open-source.
+محرك المستخلصات يدعم السابق والحالي والتراكمي على مستوى المشروع:
 
-## Run locally
+```text
+20% cumulative → current 20%
+35% cumulative → previous 20% → current 15%
+50% cumulative → previous 35% → current 15%
+```
+
+يشمل Validation لعدم الانخفاض أو تجاوز 100%، طرق Overall Progress وBOQ Quantities، الاسترداد والاحتجاز والخصومات، وإنشاء Accounting Document للمراجعة.
+
+## Accounting Cycle
+
+```text
+Source Document
+  → Classification and company mapping
+  → Draft Journal
+  → Review
+  → Post
+  → General Ledger
+  → Trial Balance
+  → Financial Statements
+```
+
+توجد قيود متعددة السطور، قفل للفترات، قيود عكسية، Open Items، Aging، Collections/Payments allocations، Exceptions، وتتبع من القيد إلى المستند المصدر.
+
+## Financial Statements
+
+من القيود المرحلة وتصنيف دليل الحسابات فقط:
+
+- Income Statement.
+- Balance Sheet مع معادلة التوازن.
+- Cash Flow مع reconciliation.
+- Changes in Equity.
+- Detailed Trial Balance.
+- Adjusted Trial Balance.
+- Post-Closing Trial Balance.
+
+## Project Accounting
+
+يدعم أساسًا تفاعليًا لـProject Ledger وProject Trial Balance وCost Ledger وProject Income Statement وProject Financial Position والربحية والمطابقة بين التكلفة التشغيلية والمحاسبية. تجميع الشركة = معاملات المشروعات + معاملات الشركة + التسويات المتاحة.
+
+## Run Locally
 
 ```bash
 npm install
 npm run dev
 ```
 
-Open `http://localhost:3000`.
+افتح `http://localhost:3000`.
 
-## Quality checks
+## Testing
 
 ```bash
 npm run typecheck
@@ -40,58 +124,24 @@ npm test
 npm run build
 ```
 
-## First run and demo data
+آخر Quality Gate: TypeScript ناجح، ESLint بلا تحذيرات، **35/35** اختبار Vitest ناجح، وNext.js production build ناجح. تم كذلك اختبار Fresh Browser flow ورفع الشعار والدخول والخروج واستعادة Session والـMobile overflow عبر Playwright/Chromium.
 
-The first visit opens a four-step setup wizard for company identity and financial defaults. Use **Settings → Reset Demo Data** to load the Atlas Construction scenario with three projects, customers, suppliers, a subcontractor, BOQ items, purchase orders, inventory movements, expenses, cumulative progress certificates, journals, contracts, WBS, cost codes, and warehouse records.
+## Git Workflow
 
-## Local persistence and backup
+المستودع الرسمي: <https://github.com/AhmedMohamed500/Contracting-Project>
 
-Current prototype stores business data locally in the browser. This is intentionally temporary until the real construction company's workflows and backend requirements are fully analyzed.
+لا Force Push ولا destructive reset. لا تُرفع نسخة قبل نجاح typecheck وlint وtests وbuild.
 
-- Data persists after refresh through the `LocalStorageErpRepository`.
-- **Backup All Data** downloads versioned JSON.
-- **Restore Backup** validates the JSON shape before replacing local data.
-- No real database, backend, paid storage, or production authentication is used.
+## Vercel Deployment
 
-## Implemented workflow
+Production: <https://binaa-construction-erp.vercel.app/>
 
-- Companies, projects, customers, suppliers, and subcontractors: create, edit, archive, search, and persist.
-- BOQ, purchase orders, inventory movements, expenses, certificates, journals, and document metadata: create, search, and persist.
-- Receiving a purchase order creates a posted inventory receipt.
-- Material issues enforce available-stock policy.
-- Posted material issues, approved expenses, and subcontract certificates feed project cost.
-- Customer certificates feed revenue and receivables.
-- Balanced journal creation feeds the trial balance.
-- Project cost, budget variance, profit, margin, and health update the dashboard from transaction data.
-- Arabic RTL / English LTR shell, responsive drawer navigation, print styles, and Excel export.
-- A global company/project/period context isolates operational lists and accounting workspaces.
-- Cumulative customer and subcontractor certificates automatically carry forward previous progress and reject lower or over-100% cumulative values.
-- Contracts include approved variation orders and revised contract value; WBS and cost codes support parent-child hierarchy, ordering, and archiving.
+النشر متصل بـGitHub ولا يحتاج Database أو Add-ons مدفوعة. يجب اختبار كل نشر جديد على Browser profile فارغ لأن البيانات محلية لكل متصفح.
 
-## Project accounting milestone
+## Current Prototype Limitations
 
-- Every project receives an automatic cost center and WBS dimension.
-- Journal lines carry company, project, cost center, cost code, WBS, BOQ, source module, source document, reference, account code, and account name.
-- Material issues, material receipts, project expenses, customer certificates, and subcontractor certificates create balanced automatic journals from the company accounting mapping.
-- Posted journals are locked; reversing a posted journal creates a new linked reversal with an audit trail.
-- Company Accounting includes financial-control exceptions, general ledger, trial balance, company income statement, chart of accounts, configurable account mapping, and month-end closing checklist.
-- Project Accounting includes project ledger, project trial balance, operational cost ledger, project income statement, financial position, profitability snapshot, journal drill-down, and accounting-to-cost-ledger reconciliation.
-- Existing browser data is migrated in place; user-created records are preserved.
-
-## Accounting UX and financial statements
-
-- Accounting & Finance is organized as sidebar workflows: daily operations, ledgers and subledgers, financial statements, period end, configuration, and control. The accounting landing page no longer exposes a growing horizontal tab bar.
-- The financial statements center provides Arabic/English income statement, balance sheet, cash flow, changes in equity, detailed trial balance, adjusted trial balance, and post-closing trial balance.
-- Statements use posted journal lines and chart-of-accounts classification only. Balance-sheet and cash-flow reconciliation warnings are calculated, not hardcoded.
-- Company statements can be filtered by project; project selection intentionally shows a project financial position instead of a misleading full project balance sheet.
-- Trial balance displays opening debit/credit, period movement, and closing debit/credit with expandable account hierarchy.
-- Certificate creation uses a six-step wizard with live previous/current/cumulative progress and value calculations, approved variation impact, deductions, review, and submission to the accounting-document workflow.
-- Automated coverage currently includes 29 business-rule and financial-reconciliation tests.
-
-## Prototype limitations and future migration
-
-This is a discovery prototype, not a production accounting system. Roles, approvals, taxes, numbering, accounting mappings, and transaction workflows must be confirmed with the target contractor before final backend design. The future migration replaces repositories with API implementations and connects a production file provider, authentication, audit, and approved database schema.
-
-## Deployment
-
-The repository is intended for GitHub-connected Vercel deployment. No paid Vercel features, database, analytics, or add-ons are required.
+- ليست مصادقة إنتاجية ولا RBAC خادميًا.
+- لا توجد قاعدة بيانات أو مزامنة بين الأجهزة.
+- تخزين الملفات الحقيقي خارج النطاق الحالي.
+- Procurement/RFQ/quotations، المخازن المتقدمة، العمالة والمعدات، Project Wizard الكامل، User Management، Report Workspace العام، Bank Reconciliation، Year-End Closing، وGlobal Search الشامل ما زالت جزئية أو خارطة طريق.
+- دليل الحسابات وOpening Balances يدخلها المستخدم؛ لا يُنشئ النظام Business Data تلقائيًا.
