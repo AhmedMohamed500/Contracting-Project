@@ -87,10 +87,22 @@ Source Document
   → Post
   → General Ledger
   → Trial Balance
+  → Adjustments
+  → Adjusted Trial Balance
   → Financial Statements
+  → Closing Journal
+  → Post-Closing Trial Balance
+  → Year-End Carry Forward
+  → New Fiscal Year Opening
 ```
 
-توجد قيود متعددة السطور، قفل للفترات، قيود عكسية، Open Items، Aging، Collections/Payments allocations، Exceptions، وتتبع من القيد إلى المستند المصدر.
+توجد قيود متعددة السطور، قفل للفترات، قيود عكسية، Open Items، Aging، Collections/Payments allocations، Exceptions، وتتبع من القيد إلى المستند المصدر. يدعم إقفال السنة الحسابات المؤقتة، تحويل صافي النتيجة إلى الأرباح المحتجزة، ترحيل الحسابات الدائمة، قيد افتتاحي متوازن، وفتح 12 فترة للسنة الجديدة مع Audit Trail ومنع التكرار.
+
+## Accounting Runtime Incident — Fixed
+
+كان انهيار صفحات الحسابات مع بعض بيانات المتصفح القديمة ناتجًا عن ترحيل سطحي يحافظ على `fiscalPeriods` بلا `closingTasks` و`settlements` بلا `allocations` وقيود بلا nested arrays سليمة. كانت الواجهة تستدعي `.filter()` و`.reduce()` مباشرة على تلك القيم.
+
+الإصلاح يطبّع كل nested accounting collections عند التحميل والاستعادة، ويحافظ على بيانات المستخدم، ويضيف Empty States واضحة وAccounting Error Boundary. اختبار Playwright يفتح 23 صفحة بالعربية والإنجليزية على Desktop وMobile في Fresh Browser ثم يعيد الاختبار بعد حقن Legacy malformed data.
 
 ## Financial Statements
 
@@ -126,7 +138,7 @@ npm test
 npm run build
 ```
 
-آخر Quality Gate: TypeScript ناجح، ESLint بلا تحذيرات، **35/35** اختبار Vitest ناجح، وNext.js production build ناجح. تم كذلك اختبار Fresh Browser flow ورفع الشعار والدخول والخروج واستعادة Session والـMobile overflow عبر Playwright/Chromium.
+آخر Quality Gate: TypeScript ناجح، ESLint بلا تحذيرات، **39/39** اختبار Vitest ناجح في 6 ملفات، وNext.js production build ناجح. نجح Accounting Playwright Smoke على 23 صفحة × لغتين × Desktop/Mobile للحالة الفارغة والبيانات القديمة المعطوبة، بلا uncaught exceptions أو blank pages.
 
 ## Git Workflow
 
@@ -145,5 +157,5 @@ Production: <https://binaa-construction-erp.vercel.app/>
 - ليست مصادقة إنتاجية ولا RBAC خادميًا.
 - لا توجد قاعدة بيانات أو مزامنة بين الأجهزة.
 - تخزين الملفات الحقيقي خارج النطاق الحالي.
-- Procurement/RFQ/quotations، المخازن المتقدمة، العمالة والمعدات، Project Wizard الكامل، User Management، Report Workspace العام، Bank Reconciliation، Year-End Closing، وGlobal Search الشامل ما زالت جزئية أو خارطة طريق.
+- Procurement/RFQ/quotations، المخازن المتقدمة، العمالة والمعدات، Project Wizard الكامل، User Management، Report Workspace العام، Bank Reconciliation، وGlobal Search الشامل ما زالت جزئية أو خارطة طريق.
 - دليل الحسابات وOpening Balances يدخلها المستخدم؛ لا يُنشئ النظام Business Data تلقائيًا.

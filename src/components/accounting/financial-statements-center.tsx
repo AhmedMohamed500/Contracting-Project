@@ -6,6 +6,7 @@ import { useState } from "react";
 import { AlertTriangle, CheckCircle2, Download, Printer, Scale } from "lucide-react";
 import { Modal } from "@/components/shared/modal";
 import { accountJournalLines, balanceSheet, cashFlowStatement, detailedTrialBalance, equityStatement, incomeStatement, type FinancialFilters } from "@/services/financial-statements";
+import { useUiStore } from "@/store/ui-store";
 import type { ErpData } from "@/types/erp";
 import { formatMoney } from "@/utils/format";
 
@@ -18,12 +19,15 @@ const reportNames: Record<FinancialReport, [string, string]> = {
 
 export function FinancialStatementsCenter({ data, companyId, initialReport = "center", t }: { data: ErpData; companyId: string; initialReport?: FinancialReport; t: T }) {
   const today = new Date().toISOString().slice(0, 10); const [report, setReport] = useState<FinancialReport>(initialReport); const [projectId, setProjectId] = useState("all"); const [from, setFrom] = useState(`${new Date().getFullYear()}-01-01`); const [to, setTo] = useState(today); const [comparison, setComparison] = useState(true); const [drill, setDrill] = useState<{ title: string; codes: string[] }>();
+  const setModule = useUiStore((state) => state.setModule);
   const filters: FinancialFilters = { companyId, projectId: projectId === "all" ? undefined : projectId, from, to };
   const projects = data.projects.filter((project) => project.companyId === companyId);
   const title = reportNames[report]; const company = data.companies.find((item) => item.id === companyId); const project = projects.find((item) => item.id === projectId);
   const previousFilters = previousPeriod(filters);
   const print = () => window.print();
   const exportExcel = async () => { const book = new ExcelJS.Workbook(); const sheet = book.addWorksheet(title[1]); sheet.addRows([["SiteCost ERP"], [company?.name ?? ""], [t(...title)], [project ? `${project.code} — ${project.name}` : t("كل المشروعات", "All projects")], [`${from} — ${to}`], []]); const rows = exportRows(report, data, filters, t); sheet.addRows(rows); sheet.getColumn(1).width = 34; sheet.getColumn(2).width = 20; [1, 3, 7].forEach((row) => { sheet.getRow(row).font = { bold: true }; }); const buffer = await book.xlsx.writeBuffer(); const url = URL.createObjectURL(new Blob([buffer])); const anchor = document.createElement("a"); anchor.href = url; anchor.download = `${report}-${to}.xlsx`; anchor.click(); URL.revokeObjectURL(url); };
+  if (!data.chartOfAccounts.some((account) => account.companyId === companyId)) return <div className="accounting-empty"><Scale/><strong>{t("لم يتم إعداد دليل الحسابات بعد", "The chart of accounts has not been configured")}</strong><button className="btn btn-primary" onClick={() => setModule("chart-accounts")}>{t("+ إعداد دليل الحسابات", "+ Set up chart of accounts")}</button></div>;
+  if (!data.journalEntries.some((entry) => entry.companyId === companyId && entry.status === "posted")) return <div className="accounting-empty"><Scale/><strong>{t("لا توجد بيانات مالية مرحّلة كافية لإعداد التقرير", "There is not enough posted financial data to prepare this report")}</strong></div>;
   return <div className="financial-center">
     <div className="financial-print-head"><strong>SiteCost ERP</strong><span>{company?.name}</span><h2>{t(...title)}</h2><span>{project ? `${project.code} — ${project.name}` : t("كل المشروعات", "All projects")} · {from} — {to}</span><small>{t("تاريخ الطباعة", "Printed")}: {new Date().toLocaleString()}</small></div>
     <div className="report-command"><div><span>{t("التقارير المالية", "FINANCIAL REPORTING")}</span><h3>{t(...title)}</h3><p>{t("مصدر الأرقام: القيود اليومية المرحلة وتصنيف دليل الحسابات فقط.", "Figures come only from posted journal lines and chart classification.")}</p></div><div className="actions"><button className="btn btn-secondary" onClick={print}><Printer size={15}/>{t("طباعة", "Print")}</button><button className="btn btn-secondary" onClick={exportExcel}><Download size={15}/>Excel</button></div></div>

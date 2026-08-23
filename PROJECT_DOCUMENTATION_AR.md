@@ -290,7 +290,7 @@ Posted Journal Lines + Chart of Accounts Classification
 | ميزان المراجعة التفصيلي | ✅ Opening/Movement/Closing |
 | ميزان المراجعة المعدل | ✅ يفصل Adjustment journals |
 | ميزان ما بعد الإقفال | ✅ يخفي الحسابات المؤقتة بعد Closing entries |
-| Year-end carry forward | ⬜ غير منفذ |
+| Year-end carry forward | ✅ كأساس تفاعلي مضبوط: Closing + profit transfer + carry forward + opening journal + 12 periods |
 
 لا تظهر الأرقام إن لم ينشئ المستخدم Accounts وPosted Journals. التوازن المحاسبي واختبارات الاستبعاد للقيود غير المرحلة منفذة.
 
@@ -334,7 +334,7 @@ Forecast/EAC/ETC/Committed وHead-office allocation المتقدمة ما زال
 
 ### Automated
 
-- Vitest: **35/35** اختبارًا ناجحًا في 5 ملفات.
+- Vitest: **39/39** اختبارًا ناجحًا في 6 ملفات.
 - محرك المستخلصات التراكمية.
 - قواعد المخزون والتكلفة والربحية.
 - توليد القيود والدورة المحاسبية.
@@ -369,8 +369,72 @@ Fresh context
 | --- | --- |
 | TypeScript strict | ✅ ناجح |
 | ESLint `--max-warnings=0` | ✅ ناجح |
-| Vitest | ✅ 35/35 |
+| Vitest | ✅ 39/39 |
 | Next.js production build | ✅ ناجح |
+
+## Accounting Runtime Incident — Fixed
+
+### Root Cause
+
+الـRepository القديم كان يتحقق من المصفوفات الرئيسية فقط ثم ينفذ Normalization سطحيًا. بيانات LocalStorage الأقدم أمكن أن تحتوي على:
+
+- `FiscalPeriod` بلا `closingTasks`.
+- `SettlementDocument` بلا `allocations`.
+- `JournalEntry` بلا `lines` أو `auditTrail`.
+- `AccountingDocument` بلا `attachments`.
+- حسابات قديمة بلا `companyId`.
+
+كان `AccountingCenter` يستدعي `currentPeriod.closingTasks.filter(...)`، وكان `AccountingOperations` وException Engine يستدعيان `settlement.allocations.reduce(...)`. لذلك تعمل Fresh/Demo data الحالية بينما تنهار بيانات Browser قديمة وتترك `<main>` فارغًا.
+
+### Affected Routes
+
+الخلل كان في مسار البيانات المشترك، لذلك أمكن أن يؤثر في Accountant Workspace، Period Closing، Settlements، Accounting Control، وكل تقرير يستقبل Journal أو Settlement قديمًا غير مكتمل البنية.
+
+### Fix
+
+- Deep normalization آمن لكل nested accounting arrays والأرقام عند `load()` و`restore()`.
+- ترحيل الحسابات القديمة بلا `companyId` إلى الشركة الأولى بدل إسقاطها.
+- إنشاء 13 مهمة إقفال افتراضية للفترات القديمة والجديدة.
+- Empty States صريحة: دليل حسابات غير مُعد، لا قيود، لا حركات، وبيانات مالية غير كافية.
+- Accounting Error Boundary تعرض «تعذر تحميل الصفحة» و«إعادة المحاولة»، وتسجل Stack حقيقيًا في Development فقط.
+- إلغاء افتراض وجود أول Period/Project/Journal داخل نقاط الانهيار المكتشفة.
+
+### Tests Added
+
+- Vitest regression للـLegacy nested data وFresh zero data.
+- Vitest لإقفال الحسابات المؤقتة وتحويل الربح والترحيل وقيد الافتتاح ومنع تكرار الإقفال.
+- Playwright Accounting Navigation Smoke: 23 صفحة × عربي/إنجليزي × Desktop/Mobile.
+- نفس Playwright flow يعيد التحميل بعد حقن `closingTasks` و`allocations` المفقودة ويتحقق من عدم وجود `pageerror` أو blank main.
+
+### Accounting Route Test Matrix
+
+| المسارات | Empty | With current data | عربي | English | 1366px | 390px | Runtime Error |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Workspace / Documents / Journals / Treasury / Settlements | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | لا |
+| GL / Subsidiary / AR / AP / Trial Balance | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | لا |
+| Financial Center / Income / Balance / Cash Flow / Equity | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | لا |
+| Adjusted TB / Closing / Post-Closing TB | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | لا |
+| COA / Cost Centers / Mapping / Control / Project Costing | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | لا |
+
+### Year-End Closing
+
+الدورة المنفذة الآن:
+
+```text
+Final adjustments
+  → Reverse revenue/cost/expense balances
+  → Transfer net result to retained earnings
+  → Close old fiscal periods
+  → Carry permanent asset/liability/equity balances
+  → Balanced opening journal
+  → Create 12 monthly periods for the new fiscal year
+```
+
+القيود تُنشأ Posted مع Audit Trail، ولا تُحمّل الحسابات المؤقتة في القيد الافتتاحي، وتُمنع إعادة تنفيذ السنة نفسها.
+
+### Production Verification
+
+سيُسجل رابط Commit ونتيجة Vercel Fresh/Legacy smoke هنا بعد نشر هذا الإصدار.
 
 ## 22. مصفوفة الحالة الصادقة
 
@@ -381,7 +445,7 @@ Fresh context
 | Setup + logo + first admin | ✅ | خمس خطوات |
 | Local hash/login/session/logout | ✅ Prototype | ليس Production Auth |
 | Empty dashboard/checklist | ✅ | صفر دون Fake KPI |
-| Safe legacy migration | ✅ | يحفظ البيانات ولا يحقن Demo |
+| Safe legacy migration | ✅ | Deep accounting normalization ويحفظ البيانات ولا يحقن Demo |
 | Companies/Parties CRUD | 🟡 | الأساس؛ الحقول والملفات المتقدمة لاحقة |
 | Project setup | 🟡 | CRUD موجود؛ Wizard الكامل لاحق |
 | Contracts/Variations | 🟡 | الأساس التفاعلي موجود؛ Change Events لاحقة |
@@ -392,7 +456,7 @@ Fresh context
 | Cumulative Certificates | ✅ للطرق A/B | الطرق C/D/E جزئية |
 | Accounting document cycle | ✅ كأساس | workflows الإنتاجية تحتاج اعتماد الشركة |
 | Open items/settlements/aging | ✅ كأساس | reconciliations المتقدمة جزئية |
-| Financial statements | ✅ كأساس | Year-end carry forward غير منفذ |
+| Financial statements | ✅ كأساس | القوائم والإقفال والترحيل السنوي منفذة؛ الإفصاحات المتقدمة لاحقة |
 | Project accounting | ✅ كأساس | Forecast/allocations المتقدمة جزئية |
 | Treasury/Bank reconciliation | 🟡 | المسار موجود؛ الشيكات والمطابقة والجرد جزئية |
 | Reporting workspace | 🟡 | قوائم مالية قوية؛ مركز تقارير كل الوحدات لاحق |
