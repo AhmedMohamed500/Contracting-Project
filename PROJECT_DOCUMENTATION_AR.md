@@ -16,8 +16,8 @@
 | التقنية | Next.js 16.3.2، React، TypeScript، Tailwind، Zustand، Vitest، Playwright |
 | التخزين | Browser LocalStorage من خلال Repository Layer |
 | Backend / Database | غير مستخدمين عمدًا |
-| آخر Milestone | Tendering & Official Correspondence — 24 أغسطس 2026 |
-| آخر Commit وظيفي | `de2e95f` |
+| آخر Milestone | Financial Statement Classification Fix — 24 أغسطس 2026 |
+| آخر Commit وظيفي | `a4ea56b` |
 | حالة النشر | ✅ منشور ومختبر على Production بمتصفح جديد |
 
 ## 2. رؤية المنتج
@@ -450,6 +450,9 @@ Final adjustments
 - حد التقرير يستخدم التاريخ المحلي للشركة/المتصفح بدل UTC، لمنع استبعاد قيود اليوم خلال الساعات الأولى بتوقيت القاهرة.
 - Regression tests: Legacy migration، preservation، missing-account warning، local-date cut-off.
 - Playwright Production Build محلي: ✅ **4/4** على Desktop وMobile، وشمل ظهور إيراد قديم ثم نقله من `project-revenue` إلى `other-income` من الواجهة.
+- Functional commit: `a4ea56b` — `fix: surface posted accounts in financial statements`.
+- GitHub `main`: ✅ تم الرفع، وVercel: ✅ `Deployment has completed` لنفس الـcommit.
+- Playwright على Production: ✅ **2/2 passed** — Desktop وMobile لنفس سيناريو ترقية الحساب والتعديل من داخل دليل الحسابات.
 
 ## 22. مصفوفة الحالة الصادقة
 
@@ -658,4 +661,4 @@ Fresh company/admin/login
 
 ---
 
-آخر تحديث: **24 أغسطس 2026 — Tendering & Official Correspondence Release**.
+آخر تحديث: **24 أغسطس 2026 — Financial Statement Classification Production Fix**.
