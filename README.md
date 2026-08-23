@@ -167,7 +167,7 @@ npm run build
 
 Production: <https://binaa-construction-erp.vercel.app/>
 
-النشر متصل بـGitHub ولا يحتاج Database أو Add-ons مدفوعة. إصدار الحسابات `4f444a2` اختُبر على Production عبر Browser profile فارغ في Desktop وMobile: Setup/Login، 23 صفحة محاسبية بالعربية والإنجليزية، ثم Legacy malformed-data migration، بلا uncaught exception أو blank page. يجب تكرار هذا الاختبار مع كل نشر لأن البيانات محلية لكل متصفح.
+النشر متصل بـGitHub ولا يحتاج Database أو Add-ons مدفوعة. إصدار المناقصات والمكاتبات `de2e95f` اختُبر على Production ببيانات متصفح جديدة في Desktop وMobile: Setup/Login، Tender وتسعيره وضمانه، Won → Project، ثم RFI وSubmittal وSite Instruction وClaim؛ النتيجة **2/2 passed** بلا uncaught runtime errors. يجب تكرار هذا الاختبار مع كل نشر لأن البيانات محلية لكل متصفح.
 
 ## Current Prototype Limitations
 

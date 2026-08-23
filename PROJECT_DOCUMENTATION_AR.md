@@ -16,8 +16,8 @@
 | التقنية | Next.js 16.3.2، React، TypeScript، Tailwind، Zustand، Vitest، Playwright |
 | التخزين | Browser LocalStorage من خلال Repository Layer |
 | Backend / Database | غير مستخدمين عمدًا |
-| آخر Milestone | Premium First-Run Setup UI — 23 أغسطس 2026 |
-| آخر Commit وظيفي | `98fcf79` |
+| آخر Milestone | Tendering & Official Correspondence — 24 أغسطس 2026 |
+| آخر Commit وظيفي | `de2e95f` |
 | حالة النشر | ✅ منشور ومختبر على Production بمتصفح جديد |
 
 ## 2. رؤية المنتج
@@ -619,6 +619,15 @@ Fresh company/admin/login
 ```
 
 النتيجة المحلية: ✅ Desktop و✅ Mobile بلا uncaught runtime errors.
+
+### Production Verification
+
+- Functional release commit: `de2e95f` — `feat: add tendering and official correspondence workflows`.
+- GitHub `main`: ✅ تم الرفع إلى المستودع الرسمي.
+- Vercel: ✅ `Deployment has completed` لنفس الـcommit.
+- Production URL: <https://binaa-construction-erp.vercel.app/>.
+- Playwright على Production: ✅ **2/2 passed** — Desktop وMobile.
+- السيناريو شمل كل المسار من Fresh Setup حتى Tender Award ثم Project وRFI وMaterial Submittal وSite Instruction وClaim وCommunication Timeline.
 
 ### الحالة الصادقة
 
