@@ -1,8 +1,10 @@
 import type { CashFlowCategory, ChartOfAccount, ErpData, JournalEntry, JournalLine } from "@/types/erp";
+import { hasValidAccountClassification } from "@/services/account-classification";
 
 export interface FinancialFilters { companyId: string; projectId?: string; from?: string; to: string; }
 export interface TrialBalanceRow { accountCode: string; accountName: string; parentCode?: string; openingDebit: number; openingCredit: number; periodDebit: number; periodCredit: number; closingDebit: number; closingCredit: number; }
 export interface StatementLine { code?: string; label: string; amount: number; section: string; accountCodes: string[]; }
+export interface FinancialReportingIssue { accountCode: string; accountName: string; reason: "missing-account" | "missing-classification"; }
 
 function posted(data: ErpData, filters: FinancialFilters, includeBefore = false) {
   return data.journalEntries.filter((entry) => entry.companyId === filters.companyId && entry.status === "posted" && entry.date <= filters.to && (includeBefore || !filters.from || entry.date >= filters.from));
@@ -14,6 +16,18 @@ function scopedLines(entry: JournalEntry, projectId?: string) {
 
 function lineBalance(lines: JournalLine[]) { return lines.reduce((sum, line) => sum + line.debit - line.credit, 0); }
 function displayBalance(account: ChartOfAccount, balance: number) { return account.normalBalance === "credit" ? -balance : balance; }
+
+export function financialReportingIssues(data: ErpData, filters: FinancialFilters): FinancialReportingIssue[] {
+  const accounts = new Map(data.chartOfAccounts.filter((account) => account.companyId === filters.companyId).map((account) => [account.code, account]));
+  const usedCodes = new Map<string, string>();
+  posted(data, filters).flatMap((entry) => scopedLines(entry, filters.projectId)).forEach((line) => usedCodes.set(line.accountCode, line.accountName));
+  return [...usedCodes].flatMap<FinancialReportingIssue>(([accountCode, accountName]) => {
+    const account = accounts.get(accountCode);
+    if (!account) return [{ accountCode, accountName, reason: "missing-account" as const }];
+    if (!hasValidAccountClassification(account)) return [{ accountCode, accountName: account.name, reason: "missing-classification" as const }];
+    return [];
+  });
+}
 
 export function detailedTrialBalance(data: ErpData, filters: FinancialFilters, mode: "trial" | "adjusted" | "post-closing" = "trial"): TrialBalanceRow[] {
   const accounts = data.chartOfAccounts.filter((account) => account.companyId === filters.companyId && account.active);

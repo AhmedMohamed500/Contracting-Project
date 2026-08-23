@@ -441,6 +441,16 @@ Final adjustments
 - السيناريو: Fresh company/admin/login ثم 23 صفحة بالعربية، Legacy malformed reload، ثم 23 صفحة بالإنجليزية.
 - النتيجة: **2/2 projects passed**، بلا uncaught exception أو blank page.
 
+### Financial Statement Classification Fix — 24 أغسطس 2026
+
+- Migration تلقائية تضيف `statementType` و`statementSection` و`normalBalance` و`cashFlowCategory` للحسابات القديمة الناقصة.
+- لا تكتب Migration فوق تصنيف يدوي صحيح سبق أن اختاره المستخدم.
+- دليل الحسابات أصبح يسمح بتعديل القائمة المالية وبند العرض وطبيعة الرصيد وتصنيف التدفقات لكل حساب، وتتحدث القوائم فورًا.
+- القوائم تعرض تحذيرًا واضحًا عند وجود Draft/Reviewed journals داخل الفترة أو Posted lines تستخدم حسابًا غير موجود/غير مصنف بدل إسقاط الرقم بصمت.
+- حد التقرير يستخدم التاريخ المحلي للشركة/المتصفح بدل UTC، لمنع استبعاد قيود اليوم خلال الساعات الأولى بتوقيت القاهرة.
+- Regression tests: Legacy migration، preservation، missing-account warning، local-date cut-off.
+- Playwright Production Build محلي: ✅ **4/4** على Desktop وMobile، وشمل ظهور إيراد قديم ثم نقله من `project-revenue` إلى `other-income` من الواجهة.
+
 ## 22. مصفوفة الحالة الصادقة
 
 | المجال | الحالة | ملاحظة |

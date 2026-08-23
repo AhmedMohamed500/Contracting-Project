@@ -116,6 +116,8 @@ Source Document
 - Adjusted Trial Balance.
 - Post-Closing Trial Balance.
 
+الحسابات القديمة الناقصة تُصنّف تلقائيًا عند التحميل مع الحفاظ على أي تصنيف يدوي سابق. من **دليل الحسابات** يمكن التحكم في القائمة المالية، بند العرض، طبيعة الرصيد، وتصنيف التدفقات النقدية. تعرض القوائم تحذيرًا للقيود غير المرحلة أو الحسابات المستخدمة غير الموجودة في الدليل، كما تستخدم تاريخ الشركة المحلي بدل UTC حتى لا تُستبعد قيود اليوم.
+
 ## Project Accounting
 
 يدعم أساسًا تفاعليًا لـProject Ledger وProject Trial Balance وCost Ledger وProject Income Statement وProject Financial Position والربحية والمطابقة بين التكلفة التشغيلية والمحاسبية. تجميع الشركة = معاملات المشروعات + معاملات الشركة + التسويات المتاحة.
@@ -155,7 +157,7 @@ npm test
 npm run build
 ```
 
-آخر Quality Gate: TypeScript ناجح، ESLint بلا تحذيرات، **51/51** اختبار Vitest ناجح في 7 ملفات، وNext.js production build ناجح. نجح Accounting Playwright Smoke، كما نجح Tender → Award → Project → RFI/Submittal/Instruction/Claim acceptance flow على Desktop وMobile.
+آخر Quality Gate: TypeScript ناجح، ESLint بلا تحذيرات، **55/55** اختبار Vitest ناجح في 7 ملفات، وNext.js production build ناجح. نجح Accounting Playwright Smoke وتصنيف الحسابات القديمة القابل للتحكم **4/4** على Desktop وMobile، كما نجح Tender → Award → Project → RFI/Submittal/Instruction/Claim acceptance flow.
 
 ## Git Workflow
 

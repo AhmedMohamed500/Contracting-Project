@@ -1,5 +1,6 @@
 import type { ErpRepository } from "./erp.repository";
 import type { AccountingDocument, AuditEvent, ErpData, FiscalPeriod, JournalEntry, JournalLine, SettlementAllocation, SettlementDocument } from "@/types/erp";
+import { withAccountClassification } from "@/services/account-classification";
 
 const STORAGE_KEY = "sitecost-erp-data-v2";
 const LEGACY_STORAGE_KEY = "binaa-erp-data-v1";
@@ -52,7 +53,7 @@ export function normalizeErpData(data: ErpData): ErpData {
   const subcontractors = asArray<ErpData["subcontractors"][number]>(data.subcontractors).map((item) => ({ ...item, companyId: item.companyId || fallbackCompany }));
   const chartOfAccounts = companies.flatMap((company) => {
     const companyAccounts = sourceAccounts.filter((account) => (account.companyId || fallbackCompany) === company.id);
-    return companyAccounts.map((account) => ({ ...account, active: account.active ?? true, isControl: account.isControl ?? false, normalBalance: account.normalBalance ?? (["liability", "equity", "revenue"].includes(account.type) ? "credit" as const : "debit" as const), cashFlowCategory: account.cashFlowCategory ?? "operating" as const }));
+    return companyAccounts.map((account) => withAccountClassification({ ...account, active: account.active ?? true, isControl: account.isControl ?? false }));
   });
   const normalizedJournals = asArray<JournalEntry>(data.journalEntries).map((entry) => {
     const project = projects.find((item) => item.id === entry.projectId);
@@ -140,7 +141,7 @@ export class LocalStorageErpRepository implements ErpRepository {
       const parsed: unknown = JSON.parse(saved);
       if (!isErpData(parsed)) return createEmptyErpData();
       const migrated = normalizeErpData(parsed);
-      if (!current && legacy) this.save(migrated);
+      if ((!current && legacy) || JSON.stringify(parsed) !== JSON.stringify(migrated)) this.save(migrated);
       return migrated;
     } catch {
       return createEmptyErpData();

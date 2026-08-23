@@ -79,3 +79,35 @@ test("Accounting Navigation Smoke Test — fresh and legacy nested data", async 
   }
   expect(runtimeErrors).toEqual([]);
 });
+
+test("Legacy account classification feeds statements and remains user-configurable", async ({ page }) => {
+  const runtimeErrors: string[] = [];
+  page.on("pageerror", (error) => runtimeErrors.push(error.message));
+  await createFreshCompany(page);
+  await page.evaluate(() => {
+    const key = "sitecost-erp-data-v2";
+    const data = JSON.parse(localStorage.getItem(key) ?? "{}");
+    const companyId = data.companies[0].id;
+    const timestamp = new Date().toISOString();
+    const base = { companyId, createdAt: timestamp, updatedAt: timestamp, isControl: false, active: true };
+    data.chartOfAccounts = [
+      { ...base, id: "legacy-bank", code: "110200", name: "البنوك", nameEn: "Banks", type: "asset" },
+      { ...base, id: "legacy-revenue", code: "410100", name: "إيرادات عقود المشاريع", nameEn: "Project Revenue", type: "revenue" },
+    ];
+    data.journalEntries = [{ id: "legacy-posted", createdAt: timestamp, updatedAt: timestamp, number: "JV-2026-0001", companyId, date: "2026-08-24", description: "Legacy posted revenue", journalType: "general", sourceModule: "Migration", sourceType: "Legacy Journal", sourceNumber: "LEGACY-1", automatic: false, status: "posted", createdBy: "Accountant", postedBy: "Accountant", auditTrail: [], lines: [
+      { accountCode: "110200", accountName: "البنوك", description: "تحصيل", debit: 1000, credit: 0 },
+      { accountCode: "410100", accountName: "إيرادات عقود المشاريع", description: "إيراد", debit: 0, credit: 1000 },
+    ] }];
+    localStorage.setItem(key, JSON.stringify(data));
+  });
+  await page.reload();
+  await openModule(page, "قائمة الدخل");
+  const expected = new Intl.NumberFormat("ar-EG", { style: "currency", currency: "EGP", maximumFractionDigits: 0 }).format(1000);
+  await expect(page.locator(".financial-row").filter({ hasText: "إيرادات المشروعات" })).toContainText(expected);
+  await openModule(page, "دليل الحسابات");
+  await expect(page.getByLabel("بند العرض 410100")).toHaveValue("project-revenue");
+  await page.getByLabel("بند العرض 410100").selectOption("other-income");
+  await openModule(page, "قائمة الدخل");
+  await expect(page.locator(".financial-row").filter({ hasText: "إيرادات أخرى" })).toContainText(expected);
+  expect(runtimeErrors).toEqual([]);
+});
