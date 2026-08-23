@@ -14,7 +14,7 @@ export interface Company extends BaseRecord { code?: string; name: string; nameE
 export type UserRole = "owner" | "general-manager" | "finance-manager" | "accountant" | "project-manager" | "site-engineer" | "procurement" | "warehouse-keeper" | "auditor";
 export interface ErpUser extends BaseRecord { fullName: string; username: string; passwordHash: string; passwordSalt: string; passwordIterations: number; role: UserRole; companyIds: Id[]; projectIds: Id[]; status: "active" | "archived"; }
 export interface Party extends BaseRecord { companyId?: Id; name: string; code: string; phone: string; email: string; taxNumber: string; balance: number; status: "active" | "archived"; }
-export interface Project extends BaseRecord { code: string; name: string; customerId: Id; companyId: Id; costCenterCode: string; wbsCode: string; location: string; contractValue: number; budget: number; actualCost: number; progress: number; startDate: string; endDate: string; status: "active" | "archived"; }
+export interface Project extends BaseRecord { code: string; name: string; customerId: Id; companyId: Id; costCenterCode: string; wbsCode: string; location: string; contractValue: number; budget: number; actualCost: number; progress: number; startDate: string; endDate: string; originTenderId?: Id; status: "active" | "archived"; }
 export interface BoqItem extends BaseRecord { projectId: Id; code: string; description: string; unit: string; quantity: number; unitRate: number; budgetRate: number; actualQuantity: number; }
 export interface PurchaseOrder extends BaseRecord { number: string; projectId: Id; supplierId: Id; description: string; amount: number; receivedAmount: number; status: Status; }
 export interface InventoryMovement extends BaseRecord { number: string; projectId: Id; material: string; warehouse: string; type: "receipt" | "issue" | "transfer" | "return"; quantity: number; unitCost: number; status: "posted" | "cancelled"; }
@@ -76,6 +76,24 @@ export interface AccountingDocument extends BaseRecord {
 export interface SettlementAllocation { id: Id; documentId: Id; amount: number; }
 export interface SettlementDocument extends BaseRecord { number: string; companyId: Id; projectId?: Id; partyId: Id; type: "customer-collection" | "supplier-payment" | "subcontractor-payment"; channel: "cash" | "bank"; amount: number; date: string; reference?: string; description: string; status: "draft" | "posted" | "cancelled"; allocations: SettlementAllocation[]; journalId?: Id; createdBy: string; }
 
+export type TenderStatus = "draft" | "under-study" | "site-visit" | "pricing" | "clarifications" | "ready" | "submitted" | "under-evaluation" | "won" | "lost" | "cancelled";
+export interface TenderChecklistItem { id: Id; label: string; completed: boolean; }
+export interface TenderCosting { directCost: number; indirectCost: number; overhead: number; contingency: number; markup: number; sellingValue: number; }
+export interface Tender extends BaseRecord { number: string; name: string; companyId: Id; clientId?: Id; clientName: string; consultant: string; projectName: string; tenderType: string; tenderSource: string; issueDate: string; siteVisitDate?: string; clarificationDeadline?: string; submissionDeadline: string; openingDate?: string; estimatedValue: number; currency: string; bidBondRequired: boolean; bidBondAmount: number; bidBondExpiry?: string; status: TenderStatus; responsiblePerson: string; notes: string; probability: number; checklist: TenderChecklistItem[]; costing: TenderCosting; convertedProjectId?: Id; }
+export interface TenderDocument extends BaseRecord { tenderId: Id; number: string; title: string; type: string; revision: string; date: string; receivedFrom: string; status: string; fileName?: string; fileType?: string; fileSize?: number; notes: string; }
+export interface TenderAddendum extends BaseRecord { tenderId: Id; number: string; date: string; description: string; receivedFrom: string; affectedBoq: string; affectedDrawings: string; affectedSpecifications: string; costImpact: number; scheduleImpactDays: number; acknowledged: boolean; notes: string; }
+export interface TenderClarification extends BaseRecord { tenderId: Id; number: string; subject: string; question: string; submittedDate?: string; submittedTo: string; response: string; responseDate?: string; status: "draft" | "submitted" | "answered" | "closed"; costImpact: number; technicalImpact: string; relatedBoq: string; relatedDrawing: string; }
+export interface TenderEstimateVersion extends BaseRecord { tenderId: Id; name: string; createdBy: string; reason: string; totalCost: number; sellingValue: number; margin: number; final: boolean; }
+export interface BidBond extends BaseRecord { companyId: Id; tenderId: Id; number: string; bank: string; amount: number; issueDate: string; expiryDate: string; status: "active" | "expiring" | "expired" | "released"; releasedDate?: string; }
+
+export type CorrespondenceKind = "outgoing" | "incoming" | "memo" | "email" | "transmittal" | "notice" | "rfi" | "submittal" | "site-instruction" | "inspection" | "ncr" | "claim" | "meeting" | "action" | "delay" | "eot";
+export interface RecordAuditEvent { action: "created" | "edited" | "prepared" | "reviewed" | "approved" | "issued" | "cancelled"; user: string; timestamp: string; }
+export interface CorrespondenceRecord extends BaseRecord { kind: CorrespondenceKind; number: string; companyId: Id; projectId?: Id; tenderId?: Id; contractId?: Id; partyId?: Id; relatedDocumentId?: Id; relatedBoqId?: Id; relatedVariationId?: Id; relatedRfiId?: Id; previousRecordId?: Id; date: string; from: string; to: string; attention: string; cc: string; subject: string; reference: string; contractClause: string; body: string; summary: string; requiredAction: string; dueDate?: string; assignedTo: string; priority: "low" | "normal" | "high" | "critical"; status: string; requiresResponse: boolean; expectedResponseDate?: string; preparedBy: string; reviewedBy: string; approvedBy: string; attachments: DocumentAttachment[]; details: Record<string, string | number | boolean | string[]>; auditTrail: RecordAuditEvent[]; }
+export interface LetterTemplate extends BaseRecord { companyId?: Id; code: string; name: string; kind: CorrespondenceKind; language: "ar" | "en" | "bilingual"; subject: string; body: string; favorite: boolean; status: "active" | "archived"; }
+export interface NumberingRule extends BaseRecord { companyId: Id; recordType: "tender" | CorrespondenceKind; prefix: string; format: string; }
+export interface ContractGuarantee extends BaseRecord { companyId: Id; projectId?: Id; contractId?: Id; type: "performance" | "advance-payment" | "retention"; number: string; bank: string; amount: number; issueDate: string; expiryDate: string; status: "active" | "expiring" | "expired" | "released"; }
+export interface ContractClause extends BaseRecord { companyId: Id; contractId: Id; number: string; title: string; description: string; category: "payment" | "variations" | "claims" | "delay" | "retention" | "guarantees" | "termination" | "insurance" | "other"; noticePeriodDays: number; responsibleRole: string; financialImpact: boolean; timeImpact: boolean; }
+
 export interface ErpData {
   version: 1;
   companies: Company[];
@@ -100,6 +118,17 @@ export interface ErpData {
   documents: DocumentMetadata[];
   accountingDocuments: AccountingDocument[];
   settlements: SettlementDocument[];
+  tenders: Tender[];
+  tenderDocuments: TenderDocument[];
+  tenderAddenda: TenderAddendum[];
+  tenderClarifications: TenderClarification[];
+  tenderEstimateVersions: TenderEstimateVersion[];
+  bidBonds: BidBond[];
+  correspondence: CorrespondenceRecord[];
+  letterTemplates: LetterTemplate[];
+  numberingRules: NumberingRule[];
+  contractGuarantees: ContractGuarantee[];
+  contractClauses: ContractClause[];
   users: ErpUser[];
   settings: { currency: string; vatRate: number; withholdingRate: number; allowNegativeStock: boolean; supplierLiabilityRecognition: "on-receipt" | "on-supplier-invoice"; revenueRecognitionMethod: "on-certificate" | "percentage-of-completion"; overheadAllocationMethod: "manual" | "revenue" | "direct-cost" | "contract-value"; };
 }

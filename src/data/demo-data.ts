@@ -107,6 +107,8 @@ export const demoData: ErpData = {
     { id: "adoc-cert-1", ...base, number: "CERT-CUS-2026-0008", sourceNumber: "CERT-CUS-2026-0008", type: "customer-certificate", companyId: "co-atlas", projectId: "prj-1", partyId: "cus-1", certificateId: "cert-1", costCenterCode: "CC-PRJ-026", wbsCode: "WBS-ABC", taxableAmount: 7200000, taxRate: 14, taxAmount: 1008000, withholdingAmount: 0, otherDeductions: 360000, grossAmount: 8208000, netAmount: 7848000, settledAmount: 5900000, currency: "EGP", documentDate: "2026-08-12", dueDate: "2026-09-11", reference: "CERT-CUS-2026-0008", description: "مستخلص عميل رقم 8", workflowStatus: "posted", accountingStatus: "posted", settlementStatus: "partially-settled", journalId: "jv-3", attachments: [], createdBy: "Project Accountant" }
   ],
   settlements: [],
+  tenders: [], tenderDocuments: [], tenderAddenda: [], tenderClarifications: [], tenderEstimateVersions: [], bidBonds: [],
+  correspondence: [], letterTemplates: [], numberingRules: [], contractGuarantees: [], contractClauses: [],
   users: [],
   settings: { currency: "EGP", vatRate: 14, withholdingRate: 1, allowNegativeStock: false, supplierLiabilityRecognition: "on-supplier-invoice", revenueRecognitionMethod: "on-certificate", overheadAllocationMethod: "manual" }
 };

@@ -503,4 +503,140 @@ Final adjustments
 
 ---
 
-آخر تحديث: **23 أغسطس 2026 — Accounting Runtime Recovery & Year-End Release**.
+## 26. المناقصات والمكاتبات الرسمية
+
+### الهيكل والتنقل
+
+أضيفت مجموعتان مستقلتان في الـSidebar:
+
+```text
+المناقصات والعقود
+  → المناقصات
+  → تسعير المناقصات
+  → استفسارات المناقصات
+  → خطابات المناقصات
+  → الضمانات الابتدائية
+
+المكاتبات والمستندات
+  → مركز المكاتبات
+  → الصادر / الوارد
+  → RFI / Submittals / Transmittals
+  → Site Instructions / Inspections / NCR
+  → Claims / Meeting Minutes / Action Tracker
+  → Letter Templates
+```
+
+### Tender Management
+
+سجل المناقصات يدعم بيانات العميل والاستشاري والمشروع والمصدر والنوع والتواريخ وقيمة الفرصة والعملة والضمان والمسؤول والاحتمالية والحالة. الحالات الفعلية:
+
+```text
+Draft → Under Study → Site Visit → Pricing → Clarifications
+→ Ready for Submission → Submitted → Under Evaluation
+→ Won / Lost / Cancelled
+```
+
+لكل Tender:
+
+- Checklist من 18 بندًا للتأكد من المستندات والمراجعة الفنية والتجارية والضريبية والمظاريف والضمان والتقديم.
+- Tender Documents مع Revision وFile Metadata.
+- Addenda مع Cost/Schedule Impact.
+- Clarifications مع السؤال والرد والأثر الفني والمالي.
+- Bid Bonds مع Active/Expiring/Expired/Released محسوبة Rule-based.
+- Costing: Direct + Indirect + Overhead + Contingency + Markup + Selling Value.
+- Estimate Versions لا تكتب فوق النسخة السابقة.
+- Pipeline يعرض Total/Submitted/Won/Lost Value وWin Rate.
+
+### Tender → Project
+
+لا يسمح التحويل إلا لحالة `Won` وبعد Confirmation مراجعة من المستخدم. التحويل ينشئ:
+
+- Project مرتبطًا بـ`originTenderId`.
+- Customer من الاسم الذي أدخله المستخدم إذا لم يكن مرتبطًا مسبقًا؛ لا توجد بيانات وهمية.
+- Contract Value من Selling Value.
+- Budget Baseline من Total Tender Cost.
+- Cost Center وWBS reference.
+- نسخ Tender Document Metadata إلى Project Documents.
+- منع التحويل المكرر.
+
+### Official Correspondence
+
+كل سجل رسمي يدعم Company وProject وTender وContract وParty وروابط Document/BOQ/Variation/RFI وخطاب سابق، إضافة إلى From/To/Attention/CC/Subject/Reference/Contract Clause/Body/Action/Due Date/Response Deadline/Attachments Metadata.
+
+مسار الخطاب الصادر:
+
+```text
+Draft → Prepared → Reviewed → Approved → Issued
+```
+
+كل انتقال وتعديل يسجل Audit Trail. لا يوجد Auto Send؛ النظام يولد ويعرض ويطبع فقط، ويظل المستخدم مسؤولًا عن مراجعة المحتوى.
+
+### Smart Letter Builder & Templates
+
+- 31 قالبًا مرجعيًا للمناقصات والاعتمادات والمطالبات والمستخلصات والمدفوعات والتسليم والإخطارات.
+- User templates: Create وDuplicate وFavorite وArchive.
+- اللغات: Arabic وEnglish وBilingual metadata مع `dir="auto"` أثناء التحرير والطباعة.
+- المتغيرات المدعومة تشمل Company/Project/Tender/Contract/Letter/Date/Client/Consultant/Subject/Reference/Amount.
+- المتغير غير المتاح يبقى ظاهرًا للمراجعة ولا يستبدل بقيمة وهمية.
+
+### Numbering
+
+يمكن ضبط `prefix` و`format` لكل Company ولكل Record Type، مثل:
+
+```text
+{{prefix}}-{{year}}-{{sequence:4}}
+2026/{{prefix}}/{{sequence:5}}
+```
+
+التسلسل معزول حسب الشركة والنوع والسنة.
+
+### Print / Excel / Metadata
+
+- الخطاب المطبوع يأخذ Logo والأسماء والعنوان والهاتف والبريد من Company Profile فقط.
+- HTML/CSS Print وBrowser Save as PDF دون خدمة مدفوعة.
+- Excel export لـTender وCorrespondence registers.
+- المرفقات Metadata فقط التزامًا بالـLocal Repository Architecture.
+
+### Tests
+
+- 12 اختبار Vitest جديدًا: checklist، tender/letter numbering، variables، costing، award conversion، document linkage، bid bond expiry، RFI/response deadline، notice/EOT deadline، claim migration، timeline وcompany isolation.
+- Playwright Acceptance على Desktop وMobile:
+
+```text
+Fresh company/admin/login
+  → open all 18 commercial routes
+  → create tender
+  → save estimate version
+  → add bid bond
+  → generate tender submission letter
+  → mark Won
+  → convert to project
+  → create RFI
+  → create material submittal
+  → create site instruction
+  → create claim
+  → verify correspondence timeline
+```
+
+النتيجة المحلية: ✅ Desktop و✅ Mobile بلا uncaught runtime errors.
+
+### الحالة الصادقة
+
+| المجال | الحالة |
+| --- | --- |
+| Tender register/checklist/costing/versioning | ✅ Prototype تفاعلي |
+| Documents/Addenda/Clarifications/Bid Bonds | ✅ Prototype تفاعلي |
+| Tender Pipeline وWon conversion | ✅ Prototype تفاعلي |
+| Letters/RFI/Submittal/Transmittal/Instruction/Inspection/NCR/Claim/Meeting/Action | ✅ سجل عام مترابط قابل للتخصيص |
+| Smart builder/templates/variables/numbering | ✅ Prototype تفاعلي |
+| Edit/workflow/audit/print/Excel | ✅ كأساس |
+| Dedicated Site Visit photo report | 🟡 Metadata والأساس موجودان؛ شاشة متخصصة لاحقة |
+| Dedicated Material/Shop Drawing/Method Statement forms | 🟡 تسجل عبر Submittals؛ حقول تخصصية أعمق لاحقة |
+| Performance/Advance/Retention guarantee UI | 🟡 Data model موجود؛ شاشة الإدارة المتخصصة لاحقة |
+| Contract Clause UI وautomated alerts | 🟡 Data model وحساب deadline موجودان؛ شاشة الربط الموسعة لاحقة |
+| Historical tender-vs-actual unit cost library | ⬜ لاحق |
+| Email/WhatsApp automatic sending | ⬜ خارج النطاق عمدًا |
+
+---
+
+آخر تحديث: **24 أغسطس 2026 — Tendering & Official Correspondence Release**.

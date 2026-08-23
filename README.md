@@ -120,6 +120,23 @@ Source Document
 
 يدعم أساسًا تفاعليًا لـProject Ledger وProject Trial Balance وCost Ledger وProject Income Statement وProject Financial Position والربحية والمطابقة بين التكلفة التشغيلية والمحاسبية. تجميع الشركة = معاملات المشروعات + معاملات الشركة + التسويات المتاحة.
 
+## Tendering & Official Correspondence
+
+توجد وحدة مستقلة داخل الـSidebar باسم **المناقصات والعقود** ووحدة **المكاتبات والمستندات**، وتشمل:
+
+- Tender Register وPipeline وDeadlines وWin Rate.
+- Checklist من 18 خطوة، Costing، Estimate Versioning، Documents، Addenda، Clarifications وBid Bonds.
+- تحويل Tender فائزة إلى Project مع `originTenderId` وBudget Baseline ونسخ Document Metadata.
+- Outgoing/Incoming Letters وRFI وSubmittals وTransmittals وSite Instructions وInspections وNCR وClaims وMeeting Minutes وAction Tracker.
+- 31 قالبًا مرجعيًا مع User-created templates وFavorite/Duplicate/Archive.
+- Smart variables مثل `{{companyName}}` و`{{projectName}}` و`{{letterNumber}}`.
+- Numbering configurable لكل Company ولكل Record Type.
+- Draft → Prepared → Reviewed → Approved → Issued مع Audit Trail.
+- Company header حقيقي من Company Profile، ومرفقات Metadata فقط، وطباعة HTML/CSS أو Browser Save as PDF.
+- Excel export للسجلات، Company/Project isolation، Deadline وBid Bond alerts، وCorrespondence Timeline.
+
+لا يرسل النظام Email أو WhatsApp تلقائيًا؛ المستخدم يملك النص ويعدله ويعتمده قبل الإصدار.
+
 ## Run Locally
 
 ```bash
@@ -138,7 +155,7 @@ npm test
 npm run build
 ```
 
-آخر Quality Gate: TypeScript ناجح، ESLint بلا تحذيرات، **39/39** اختبار Vitest ناجح في 6 ملفات، وNext.js production build ناجح. نجح Accounting Playwright Smoke على 23 صفحة × لغتين × Desktop/Mobile للحالة الفارغة والبيانات القديمة المعطوبة، بلا uncaught exceptions أو blank pages.
+آخر Quality Gate: TypeScript ناجح، ESLint بلا تحذيرات، **51/51** اختبار Vitest ناجح في 7 ملفات، وNext.js production build ناجح. نجح Accounting Playwright Smoke، كما نجح Tender → Award → Project → RFI/Submittal/Instruction/Claim acceptance flow على Desktop وMobile.
 
 ## Git Workflow
 
@@ -158,4 +175,5 @@ Production: <https://binaa-construction-erp.vercel.app/>
 - لا توجد قاعدة بيانات أو مزامنة بين الأجهزة.
 - تخزين الملفات الحقيقي خارج النطاق الحالي.
 - Procurement/RFQ/quotations، المخازن المتقدمة، العمالة والمعدات، Project Wizard الكامل، User Management، Report Workspace العام، Bank Reconciliation، وGlobal Search الشامل ما زالت جزئية أو خارطة طريق.
+- النماذج المتخصصة الموسعة لـSite Visit Photos، Material technical sheets، Contract Guarantees/Clauses وHistorical Unit Cost Library لها Data foundation أو سجل عام، لكنها تحتاج شاشات تفصيلية إضافية قبل اعتبارها مكتملة إنتاجيًا.
 - دليل الحسابات وOpening Balances يدخلها المستخدم؛ لا يُنشئ النظام Business Data تلقائيًا.

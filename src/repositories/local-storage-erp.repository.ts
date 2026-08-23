@@ -24,6 +24,8 @@ export function createEmptyErpData(): ErpData {
     contracts: [], variationOrders: [], wbsNodes: [], costCodes: [], warehouses: [],
     chartOfAccounts: [], accountingMappings: [], journalEntries: [], fiscalPeriods: [],
     documents: [], accountingDocuments: [], settlements: [], users: [],
+    tenders: [], tenderDocuments: [], tenderAddenda: [], tenderClarifications: [], tenderEstimateVersions: [], bidBonds: [],
+    correspondence: [], letterTemplates: [], numberingRules: [], contractGuarantees: [], contractClauses: [],
     settings: { currency: "EGP", vatRate: 14, withholdingRate: 1, allowNegativeStock: false, supplierLiabilityRecognition: "on-supplier-invoice", revenueRecognitionMethod: "on-certificate", overheadAllocationMethod: "manual" },
   };
 }
@@ -104,6 +106,17 @@ export function normalizeErpData(data: ErpData): ErpData {
     documents: asArray<ErpData["documents"][number]>(data.documents),
     accountingDocuments,
     settlements,
+    tenders: asArray<ErpData["tenders"][number]>(data.tenders).map((tender) => ({ ...tender, checklist: asArray<ErpData["tenders"][number]["checklist"][number]>(tender.checklist), costing: { directCost: amount(tender.costing?.directCost), indirectCost: amount(tender.costing?.indirectCost), overhead: amount(tender.costing?.overhead), contingency: amount(tender.costing?.contingency), markup: amount(tender.costing?.markup), sellingValue: amount(tender.costing?.sellingValue) }, probability: amount(tender.probability), estimatedValue: amount(tender.estimatedValue), bidBondAmount: amount(tender.bidBondAmount) })),
+    tenderDocuments: asArray<ErpData["tenderDocuments"][number]>(data.tenderDocuments),
+    tenderAddenda: asArray<ErpData["tenderAddenda"][number]>(data.tenderAddenda),
+    tenderClarifications: asArray<ErpData["tenderClarifications"][number]>(data.tenderClarifications),
+    tenderEstimateVersions: asArray<ErpData["tenderEstimateVersions"][number]>(data.tenderEstimateVersions),
+    bidBonds: asArray<ErpData["bidBonds"][number]>(data.bidBonds),
+    correspondence: asArray<ErpData["correspondence"][number]>(data.correspondence).map((record) => ({ ...record, attachments: asArray<ErpData["correspondence"][number]["attachments"][number]>(record.attachments), auditTrail: asArray<ErpData["correspondence"][number]["auditTrail"][number]>(record.auditTrail), details: record.details && typeof record.details === "object" ? record.details : {} })),
+    letterTemplates: asArray<ErpData["letterTemplates"][number]>(data.letterTemplates),
+    numberingRules: asArray<ErpData["numberingRules"][number]>(data.numberingRules),
+    contractGuarantees: asArray<ErpData["contractGuarantees"][number]>(data.contractGuarantees),
+    contractClauses: asArray<ErpData["contractClauses"][number]>(data.contractClauses),
     users: asArray<ErpData["users"][number]>(data.users).map((user) => ({ ...user, companyIds: Array.isArray(user.companyIds) ? user.companyIds.filter((id): id is string => typeof id === "string") : [], projectIds: Array.isArray(user.projectIds) ? user.projectIds.filter((id): id is string => typeof id === "string") : [] })),
     settings: {
       ...defaults.settings,
