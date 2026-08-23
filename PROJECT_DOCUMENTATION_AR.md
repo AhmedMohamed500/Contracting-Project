@@ -434,7 +434,12 @@ Final adjustments
 
 ### Production Verification
 
-سيُسجل رابط Commit ونتيجة Vercel Fresh/Legacy smoke هنا بعد نشر هذا الإصدار.
+- Accounting release commit: `4f444a2` — `fix: restore accounting runtime and complete accounting workflow`.
+- Vercel deployment: ✅ `Deployment has completed` لنفس الـcommit.
+- Production URL: <https://binaa-construction-erp.vercel.app/>.
+- Playwright Production: ✅ Desktop وMobile.
+- السيناريو: Fresh company/admin/login ثم 23 صفحة بالعربية، Legacy malformed reload، ثم 23 صفحة بالإنجليزية.
+- النتيجة: **2/2 projects passed**، بلا uncaught exception أو blank page.
 
 ## 22. مصفوفة الحالة الصادقة
 
@@ -498,4 +503,4 @@ Final adjustments
 
 ---
 
-آخر تحديث: **23 أغسطس 2026 — Premium First-Run Setup UI**.
+آخر تحديث: **23 أغسطس 2026 — Accounting Runtime Recovery & Year-End Release**.
