@@ -2,15 +2,15 @@ import { expect, test, type Page } from "@playwright/test";
 
 const routes = [
   "لوحة المحاسب", "المستندات المحاسبية", "القيود اليومية", "الخزينة والبنوك", "التسويات",
-  "الأستاذ العام", "الأستاذ المساعد", "الذمم المدينة", "الذمم الدائنة", "ميزان المراجعة",
-  "القوائم المالية", "قائمة الدخل", "الميزانية العمومية", "قائمة التدفقات النقدية", "التغير في حقوق الملكية",
-  "ميزان المراجعة المعدل", "الإقفالات", "ميزان ما بعد الإقفال", "دليل الحسابات", "مراكز التكلفة",
-  "ربط الحسابات", "الرقابة المحاسبية", "تكاليف وربحية المشاريع",
+  "دفتر الأستاذ العام", "الأستاذ المساعد", "الذمم المدينة", "الذمم الدائنة", "ميزان المراجعة",
+  "القوائم المالية", "قائمة الدخل", "قائمة المركز المالي", "قائمة التدفقات النقدية", "قائمة التغيرات في حقوق الملكية",
+  "ميزان المراجعة المعدل", "إقفال الفترة", "ميزان ما بعد الإقفال", "دليل الحسابات", "مراكز التكلفة",
+  "الربط المحاسبي", "الرقابة المحاسبية", "تكاليف وربحية المشروعات",
 ];
 const englishRoutes = [
   "Accountant Dashboard", "Accounting Documents", "Journal Entries", "Treasury & Banks", "Settlements",
   "General Ledger", "Subsidiary Ledgers", "Receivables", "Payables", "Trial Balance",
-  "Financial Statements", "Income Statement", "Balance Sheet", "Cash Flow Statement", "Changes in Equity",
+  "Financial Statements", "Income Statement", "Financial Position", "Cash Flow Statement", "Changes in Equity",
   "Adjusted Trial Balance", "Period Closing", "Post-closing Trial Balance", "Chart of Accounts", "Cost Centers",
   "Account Mapping", "Accounting Control", "Project Costing",
 ];
@@ -39,8 +39,17 @@ async function createFreshCompany(page: Page) {
 }
 
 async function openModule(page: Page, name: string) {
-  if ((page.viewportSize()?.width ?? 1366) <= 760) await page.locator("button.mobile-menu").click();
-  await page.locator("aside").getByRole("button", { name, exact: true }).click();
+  if ((page.viewportSize()?.width ?? 1366) <= 760) await page.locator("button.mobile-menu").click({ force: true });
+  const aside = page.locator("aside");
+  const target = aside.getByRole("button", { name, exact: true });
+  if (!await target.isVisible()) {
+    const english = englishRoutes.includes(name);
+    const parent = aside.getByRole("button", { name: english ? "Accounting" : "الحسابات", exact: true });
+    if (await parent.getAttribute("aria-expanded") === "false") await parent.dispatchEvent("click");
+    for (const button of await aside.locator(".nav-subgroup-button[aria-expanded='false']").all()) if (await button.isVisible()) await button.dispatchEvent("click");
+  }
+  await target.dispatchEvent("click");
+  if ((page.viewportSize()?.width ?? 1366) <= 760) await expect(page.locator("aside")).not.toHaveClass(/open/);
 }
 
 test.beforeEach(async ({ page }) => {
@@ -71,6 +80,11 @@ test("Accounting Navigation Smoke Test — fresh and legacy nested data", async 
   await page.reload();
   await openModule(page, "لوحة المحاسب");
   await expect(page.getByText("لم يتم إعداد دليل الحسابات بعد")).toBeVisible();
+  await openModule(page, "القيود اليومية");
+  await page.reload();
+  await expect(page.locator("main").getByRole("heading", { name: "القيود اليومية", exact: true })).toBeVisible();
+  await expect(page.locator("aside").getByRole("button", { name: "الحسابات", exact: true })).toHaveAttribute("aria-expanded", "true");
+  await expect(page.locator("aside").getByRole("button", { name: "العمليات اليومية", exact: true })).toHaveAttribute("aria-expanded", "true");
   await page.getByRole("button", { name: "Language" }).click();
   for (const name of englishRoutes) {
     await openModule(page, name);

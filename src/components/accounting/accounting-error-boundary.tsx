@@ -3,7 +3,7 @@
 import { AlertTriangle, RotateCcw } from "lucide-react";
 import { Component, type ErrorInfo, type ReactNode } from "react";
 
-interface Props { children: ReactNode; resetKey: string; }
+interface Props { children: ReactNode; resetKey: string; language?: "ar" | "en"; }
 interface State { error?: Error; }
 
 export class AccountingErrorBoundary extends Component<Props, State> {
@@ -21,6 +21,7 @@ export class AccountingErrorBoundary extends Component<Props, State> {
 
   render() {
     if (!this.state.error) return this.props.children;
-    return <div className="accounting-fallback" role="alert"><AlertTriangle/><strong>تعذر تحميل الصفحة</strong><p>حدث خطأ غير متوقع أثناء تجهيز بيانات الحسابات.</p><button className="btn btn-primary" onClick={() => this.setState({ error: undefined })}><RotateCcw size={16}/>إعادة المحاولة</button></div>;
+    const english = this.props.language === "en";
+    return <div className="accounting-fallback" role="alert"><AlertTriangle/><strong>{english?"Could not load this page":"تعذر تحميل الصفحة"}</strong><p>{english?"An unexpected error occurred while preparing accounting data.":"حدث خطأ غير متوقع أثناء تجهيز بيانات الحسابات."}</p><button className="btn btn-primary" onClick={() => this.setState({ error: undefined })}><RotateCcw size={16}/>{english?"Try again":"إعادة المحاولة"}</button></div>;
   }
 }

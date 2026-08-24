@@ -1,6 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 
-const modules = ["المناقصات", "تسعير المناقصات", "استفسارات المناقصات", "خطابات المناقصات", "الضمانات الابتدائية", "مركز المكاتبات", "الخطابات الصادرة", "الخطابات الواردة", "طلبات الاستفسار", "الاعتمادات", "إرسال المستندات", "أوامر الموقع", "طلبات الفحص", "عدم المطابقة", "المطالبات", "محاضر الاجتماعات", "متابعة الإجراءات", "قوالب الخطابات"];
+const tenderModules = ["المناقصات", "تسعير المناقصات", "استفسارات المناقصات", "خطابات المناقصات", "الضمانات الابتدائية"];
+const modules = [...tenderModules, "مركز المكاتبات", "الخطابات الصادرة", "الخطابات الواردة", "طلبات المعلومات (RFI)", "الاعتمادات (Submittals)", "خطابات الإرسال (Transmittals)", "تعليمات الموقع", "طلبات الفحص", "تقارير عدم المطابقة (NCR)", "المطالبات", "محاضر الاجتماعات", "متابعة الإجراءات", "قوالب الخطابات"];
 
 async function setup(page: Page) {
   await page.goto("/");
@@ -19,8 +20,10 @@ async function setup(page: Page) {
 }
 
 async function openModule(page: Page, name: string) {
-  if ((page.viewportSize()?.width ?? 1366) <= 760) await page.locator("button.mobile-menu").click();
-  await page.locator("aside").getByRole("button", { name, exact: true }).click();
+  if ((page.viewportSize()?.width ?? 1366) <= 760) await page.locator("button.mobile-menu").click({ force: true });
+  const aside = page.locator("aside"); const target = aside.getByRole("button", { name, exact: true });
+  if (!await target.isVisible()) { const parent = aside.getByRole("button", { name: tenderModules.includes(name) ? "المناقصات والعقود" : "المكاتبات والمستندات", exact: true }); if (await parent.getAttribute("aria-expanded") === "false") await parent.dispatchEvent("click"); }
+  await target.dispatchEvent("click");
   await expect(page.locator("main h2").filter({ hasText: name })).toBeVisible();
 }
 
@@ -43,11 +46,11 @@ test("Tender → award → project → correspondence acceptance flow", async ({
   await page.getByRole("button", { name: "إنشاء خطاب تقديم" }).click();
   await page.locator(".commercial-hero select").selectOption("won"); page.once("dialog", dialog => dialog.accept()); await page.getByRole("button", { name: "تحويل إلى مشروع" }).click();
 
-  await openModule(page, "طلبات الاستفسار"); await page.getByRole("button", { name: "إنشاء سجل" }).click();
+  await openModule(page, "طلبات المعلومات (RFI)"); await page.getByRole("button", { name: "إنشاء سجل" }).click();
   await page.getByLabel("المشروع").selectOption({ label: "PRJ-2026-0001 — المبنى الإداري الجديد" }); await page.getByLabel("إلى", { exact: true }).fill("المكتب الاستشاري"); await page.getByLabel("الموضوع").fill("استفسار تفاصيل الأساسات"); await page.getByLabel("نص الخطاب / السؤال / الوصف").fill("يرجى توضيح تفصيلة التسليح.");
   await page.locator(".dialog").getByRole("checkbox").check(); await page.getByLabel("تاريخ الرد المتوقع").fill("2026-09-01"); await page.getByRole("button", { name: "حفظ للمراجعة" }).click(); await expect(page.getByText("RFI-2026-0001", { exact: true })).toBeVisible();
 
-  for (const [module, subject] of [["الاعتمادات", "اعتماد مادة خرسانة"], ["أوامر الموقع", "تعليمات تعديل المدخل"], ["المطالبات", "مطالبة تغيير أعمال المدخل"]] as const) {
+  for (const [module, subject] of [["الاعتمادات (Submittals)", "اعتماد مادة خرسانة"], ["تعليمات الموقع", "تعليمات تعديل المدخل"], ["المطالبات", "مطالبة تغيير أعمال المدخل"]] as const) {
     await openModule(page, module); await page.getByRole("button", { name: "إنشاء سجل" }).click(); await page.getByLabel("المشروع").selectOption({ label: "PRJ-2026-0001 — المبنى الإداري الجديد" }); await page.getByLabel("الموضوع").fill(subject); await page.getByLabel("نص الخطاب / السؤال / الوصف").fill(subject); await page.getByRole("button", { name: "حفظ للمراجعة" }).click();
   }
   await openModule(page, "مركز المكاتبات"); await expect(page.getByText("استفسار تفاصيل الأساسات")).toBeVisible(); expect(errors).toEqual([]);

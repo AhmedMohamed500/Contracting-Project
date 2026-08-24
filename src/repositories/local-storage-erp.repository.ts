@@ -1,12 +1,13 @@
 import type { ErpRepository } from "./erp.repository";
 import type { AccountingDocument, AuditEvent, ErpData, FiscalPeriod, JournalEntry, JournalLine, SettlementAllocation, SettlementDocument } from "@/types/erp";
 import { withAccountClassification } from "@/services/account-classification";
+import { safeNumber } from "@/utils/safe-number";
 
 const STORAGE_KEY = "sitecost-erp-data-v2";
 const LEGACY_STORAGE_KEY = "binaa-erp-data-v1";
 
 const asArray = <T>(value: unknown): T[] => Array.isArray(value) ? value.filter((item): item is T => Boolean(item) && typeof item === "object") : [];
-const amount = (value: unknown): number => typeof value === "number" && Number.isFinite(value) ? value : Number(value) || 0;
+const amount = safeNumber;
 
 export function defaultClosingTasks(): FiscalPeriod["closingTasks"] {
   return [
@@ -91,10 +92,10 @@ export function normalizeErpData(data: ErpData): ErpData {
     subcontractors,
     projects,
     boqItems: asArray<ErpData["boqItems"][number]>(data.boqItems),
-    purchaseOrders: asArray<ErpData["purchaseOrders"][number]>(data.purchaseOrders),
-    inventoryMovements: asArray<ErpData["inventoryMovements"][number]>(data.inventoryMovements),
-    expenses: asArray<ErpData["expenses"][number]>(data.expenses),
-    certificates: asArray<ErpData["certificates"][number]>(data.certificates),
+    purchaseOrders: asArray<ErpData["purchaseOrders"][number]>(data.purchaseOrders).map((record) => ({ ...record, amount: amount(record.amount), receivedAmount: amount(record.receivedAmount) })),
+    inventoryMovements: asArray<ErpData["inventoryMovements"][number]>(data.inventoryMovements).map((record) => ({ ...record, quantity: amount(record.quantity), unitCost: amount(record.unitCost) })),
+    expenses: asArray<ErpData["expenses"][number]>(data.expenses).map((record) => ({ ...record, amount: amount(record.amount) })),
+    certificates: asArray<ErpData["certificates"][number]>(data.certificates).map((record) => ({ ...record, grossAmount: amount(record.grossAmount), retentionRate: amount(record.retentionRate), taxRate: amount(record.taxRate), paidAmount: amount(record.paidAmount), lines: asArray<NonNullable<ErpData["certificates"][number]["lines"]>[number]>(record.lines).map((line) => ({ ...line, contractQuantity: amount(line.contractQuantity), previousQuantity: amount(line.previousQuantity), currentQuantity: amount(line.currentQuantity), cumulativeQuantity: amount(line.cumulativeQuantity), unitRate: amount(line.unitRate), currentValue: amount(line.currentValue), cumulativeValue: amount(line.cumulativeValue) })) })),
     contracts: asArray<ErpData["contracts"][number]>(data.contracts),
     variationOrders: asArray<ErpData["variationOrders"][number]>(data.variationOrders),
     wbsNodes: asArray<ErpData["wbsNodes"][number]>(data.wbsNodes),
