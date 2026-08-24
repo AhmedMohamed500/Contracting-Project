@@ -721,7 +721,8 @@ Fresh company/admin/login
 - Vercel يستخدم لاستضافة تطبيق Next.js الأمامي فقط.
 - لا توجد Functions أو Route Handlers أو Server Actions للحفظ أو أي تكامل Database/Storage.
 - Production URL: <https://binaa-construction-erp.vercel.app/>.
-- تضاف نتيجة التحقق من Deployment وProduction Smoke بعد رفع هذا الإصدار.
+- Deployment للـcommit `f19d437`: ✅ `Deployment has completed`.
+- Production Playwright: ✅ **6/6 passed** على Desktop وMobile، وتشمل Accounting وLegacy Classification وTender → Project → Correspondence.
 
 ### ARCHITECTURE
 
